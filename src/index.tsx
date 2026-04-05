@@ -42,9 +42,10 @@ apiV1.route('/upload', uploadRoutes);
 app.route('/api/v1', apiV1);
 
 const port = 3000;
-logger.info(`Server is starting on port ${port}...`);
 
 serve({
     fetch: app.fetch,
     port
+}, (info) => {
+    logger.info(`Server is running! You can visit: http://localhost:${info.port}`);
 });
