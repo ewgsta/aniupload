@@ -3,16 +3,23 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { uploadRoutes } from './routes/upload.routes.js';
 import { logger } from './utils/logger.js';
-import { Dashboard } from './views/Dashboard.js';
+import { Dashboard } from './views/pages/Dashboard.js';
+import { serveStatic } from '@hono/node-server/serve-static';
 
 const app = new Hono();
 
 // Global Middlewares
 app.use('*', cors());
 
+// Static Files
+app.use('/css/*', serveStatic({
+    root: './',
+    rewriteRequestPath: (path) => path.replace(/^\/css/, '/src/views/components')
+}));
+
 // UI Routes (JSX rendered)
 app.get('/', (c) => {
-    return c.html(<Dashboard apiStatus="Online" />);
+    return c.html(<Dashboard />);
 });
 
 // Create API v1 group
