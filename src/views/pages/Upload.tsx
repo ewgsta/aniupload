@@ -59,12 +59,16 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
                     <h3 style={{ marginBottom: '15px', color: '#3b5323' }}>Hedef Bölüm</h3>
                     <div style={{ display: 'flex', gap: '15px' }}>
                         <div class="form-group" style={{ flex: 1 }}>
-                            <label>Hangi Sezon Yüklenecek?</label>
-                            <input type="number" id="target-season" class="form-input" value="1" min="1" />
+                            <label>Sezon Seçin</label>
+                            <select id="target-season" class="form-input" onchange="updateEpisodeDropdown()">
+                                <option value="">Önce Aşama 1'i Doldurun</option>
+                            </select>
                         </div>
                         <div class="form-group" style={{ flex: 1 }}>
-                            <label>Hangi Bölüm Yüklenecek?</label>
-                            <input type="number" id="target-episode" class="form-input" value="1" min="1" />
+                            <label>Bölüm Seçin</label>
+                            <select id="target-episode" class="form-input" disabled>
+                                <option value="">Sezon Seçin</option>
+                            </select>
                         </div>
                     </div>
                     <button class="btn btn-auto" style={{ background: 'linear-gradient(to bottom, #999, #777)', borderColor: '#555' }} onclick="nextStep(1)">&lt; Geri</button>
@@ -132,7 +136,51 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
 
             {html`
             <script>
+                function updateEpisodeDropdown() {
+                    const seasonSelect = document.getElementById('target-season');
+                    const epSelect = document.getElementById('target-episode');
+                    
+                    if (!seasonSelect.value) {
+                        epSelect.disabled = true;
+                        epSelect.innerHTML = '<option value="">Sezon Seçin</option>';
+                        return;
+                    }
+                    
+                    const opt = seasonSelect.options[seasonSelect.selectedIndex];
+                    const maxEps = parseInt(opt.getAttribute('data-eps')) || 0;
+                    
+                    epSelect.innerHTML = '<option value="">-- Bölüm Seç --</option>';
+                    for(let i=1; i<=maxEps; i++) {
+                        epSelect.innerHTML += '<option value="' + i + '">Bölüm ' + i + '</option>';
+                    }
+                    epSelect.disabled = false;
+                }
+
                 function nextStep(step) {
+                    if (step === 2) {
+                        const seasonsConfig = [];
+                        const rows = document.querySelectorAll('.season-row');
+                        rows.forEach((row, index) => {
+                            const eps = row.querySelector('.season-episodes-input').value;
+                            seasonsConfig.push({ index: index + 1, eps: parseInt(eps) || 0 });
+                        });
+                        
+                        const seasonSelect = document.getElementById('target-season');
+                        seasonSelect.innerHTML = '';
+                        if (seasonsConfig.length === 0) {
+                            seasonSelect.innerHTML = '<option value="">Önce Sezon Ekleyin</option>';
+                            document.getElementById('target-episode').innerHTML = '<option value="">-</option>';
+                            document.getElementById('target-episode').disabled = true;
+                        } else {
+                            seasonSelect.innerHTML = '<option value="">-- Sezon Seç --</option>';
+                            seasonsConfig.forEach(s => {
+                                seasonSelect.innerHTML += '<option value="' + s.index + '" data-eps="' + s.eps + '">Sezon ' + s.index + '</option>';
+                            });
+                            document.getElementById('target-episode').disabled = true;
+                            document.getElementById('target-episode').innerHTML = '<option value="">Önce Sezon Seçin</option>';
+                        }
+                    }
+
                     for(let i=1; i<=4; i++) {
                         document.getElementById('step-'+i).style.display = (i === step) ? 'block' : 'none';
                         document.getElementById('ind-step-'+i).style.color = (i === step) ? '#6b8e23' : '#999';
@@ -254,6 +302,9 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
 
                 function startUpload() {
                     const title = document.getElementById('anime-title').value;
+                    const selectedSeason = document.getElementById('target-season').value;
+                    const selectedEpisode = document.getElementById('target-episode').value;
+
                     if (!title) {
                         alert("HATA: Lütfen ilk aşamadan Anime Adını girin.");
                         nextStep(1);
@@ -262,6 +313,11 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
                     if (seasonCount === 0) {
                         alert("HATA: Lütfen ilk aşamadan en az 1 sezon ekleyin.");
                         nextStep(1);
+                        return;
+                    }
+                    if (!selectedSeason || !selectedEpisode) {
+                        alert("HATA: Lütfen yüklenecek Sezon ve Bölümü Aşama 2'den seçin.");
+                        nextStep(2);
                         return;
                     }
                     if (!fileInput.files.length) {
