@@ -1,7 +1,7 @@
 import type { FC } from 'hono/jsx';
 import { Layout } from '../components/Layout.js';
 
-export const Dashboard: FC<{ username: string; showSuccessToast?: boolean }> = ({ username, showSuccessToast }) => {
+export const Dashboard: FC<{ username: string; showSuccessToast?: boolean; totalAnime?: number; totalEpisodes?: number }> = ({ username, showSuccessToast, totalAnime = 0, totalEpisodes = 0 }) => {
     return (
         <Layout title="AniUpload - Dashboard">
             <nav class="transparent-nav">
@@ -20,11 +20,11 @@ export const Dashboard: FC<{ username: string; showSuccessToast?: boolean }> = (
                 <div style={{ display: 'flex', gap: '20px', marginBottom: '25px' }}>
                     <div style={{ flex: 1, backgroundColor: '#fff', padding: '20px', border: '1px solid #c2bba8', borderRadius: '4px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)' }}>
                         <h3 style={{ fontSize: '13px', color: '#666', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '1px' }}>Toplam Anime</h3>
-                        <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#3b5323', textShadow: '1px 1px 0px #eee' }}>0</p>
+                        <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#3b5323', textShadow: '1px 1px 0px #eee' }}>{totalAnime}</p>
                     </div>
                     <div style={{ flex: 1, backgroundColor: '#fff', padding: '20px', border: '1px solid #c2bba8', borderRadius: '4px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)' }}>
                         <h3 style={{ fontSize: '13px', color: '#666', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '1px' }}>Toplam Bölüm</h3>
-                        <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#3b5323', textShadow: '1px 1px 0px #eee' }}>0</p>
+                        <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#3b5323', textShadow: '1px 1px 0px #eee' }}>{totalEpisodes}</p>
                     </div>
                 </div>
 
@@ -32,7 +32,7 @@ export const Dashboard: FC<{ username: string; showSuccessToast?: boolean }> = (
                     <h3 style={{ fontSize: '15px', marginBottom: '10px', color: '#3b5323' }}>Hızlı İşlemler</h3>
                     <p style={{ fontSize: '13px', color: '#666', margin: '10px 0 15px 0' }}>Sistemde bekleyen bir video işleme bulunmuyor.</p>
                     <a href="/upload" class="btn btn-auto" style={{ textDecoration: 'none' }}>Yeni Anime Yükle</a>
-                    <button class="btn btn-auto" style={{ marginLeft: '10px', background: 'linear-gradient(to bottom, #dcdcdc 0%, #c0c0c0 100%)', borderColor: '#888', color: '#333', textShadow: '1px 1px 0 #fff' }}>Arşivi İncele</button>
+                    <a href="/archive" class="btn btn-auto" style={{ marginLeft: '10px', textDecoration: 'none', background: 'linear-gradient(to bottom, #dcdcdc 0%, #c0c0c0 100%)', borderColor: '#888', color: '#333', textShadow: '1px 1px 0 #fff' }}>Arşivi İncele</a>
                 </div>
             </div>
 
