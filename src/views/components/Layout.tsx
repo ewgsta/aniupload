@@ -1,6 +1,6 @@
 import type { FC } from 'hono/jsx';
 
-export const Layout: FC<{ title?: string }> = (props) => {
+export const Layout: FC<{ title?: string; children?: any }> = (props) => {
     return (
         <html lang="tr">
             <head>

@@ -11,7 +11,7 @@ export const Login: FC = () => {
                         <p>Arşive giriş yap</p>
                     </div>
 
-                    <form action="/dashboard" method="POST">
+                    <form action="/dashboard" method="post">
                         <div class="form-group">
                             <label for="username">Kullanıcı Adı</label>
                             <input type="text" id="username" class="form-input" name="username" required />
