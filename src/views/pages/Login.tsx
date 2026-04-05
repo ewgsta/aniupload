@@ -13,7 +13,7 @@ export const Login: FC = () => {
 
                     <form action="/dashboard" method="post">
                         <div class="form-group">
-                            <label for="username">Kullanıcı Adı</label>
+                            <label for="username">Kullanıcı Adı veya Email</label>
                             <input type="text" id="username" class="form-input" name="username" required />
                         </div>
 
@@ -22,24 +22,8 @@ export const Login: FC = () => {
                             <input type="password" id="password" class="form-input" name="password" required />
                         </div>
 
-                        <div class="form-group" style={{ marginTop: '20px' }}>
-                            <label for="slider">Ayar (Slider)</label>
-                            <input type="range" id="slider" class="form-slider" min="0" max="100" />
-                        </div>
-
                         <button type="submit" class="btn">Giriş Yap</button>
                     </form>
-
-                    <div class="footer-links">
-                        <a href="#">Şifremi Unuttum</a> | <a href="#">Kayıt Ol</a>
-                    </div>
-                </div>
-            </div>
-
-            {/* Toast Example Component Area */}
-            <div class="toast-container">
-                <div class="toast">
-                    <strong>Bilgi:</strong> Lorem ipsum dolor sit amet, consectetur.
                 </div>
             </div>
         </Layout>

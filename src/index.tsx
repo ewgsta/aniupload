@@ -47,5 +47,5 @@ serve({
     fetch: app.fetch,
     port
 }, (info) => {
-    logger.info(`Server is running! You can visit: http://localhost:${info.port}`);
+    logger.info(`Server running at http://localhost:${info.port}`);
 });
