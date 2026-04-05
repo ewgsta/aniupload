@@ -9,7 +9,6 @@ import { uploadRoutes } from './routes/upload.routes.js';
 import { logger } from './utils/logger.js';
 import { Dashboard } from './views/pages/Dashboard.js';
 import { Login } from './views/pages/Login.js';
-import { Register } from './views/pages/Register.js';
 import { AuthService } from './services/auth.service.js';
 import { initDb } from './db/index.js';
 

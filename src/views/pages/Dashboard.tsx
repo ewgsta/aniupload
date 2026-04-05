@@ -17,16 +17,28 @@ export const Dashboard: FC<{ username: string }> = ({ username }) => {
                     <h2 style={{ color: '#3b5323', fontSize: '20px' }}>Sistem Özeti</h2>
                 </div>
 
-                <p style={{ color: '#4a4a4a', lineHeight: '1.6', marginBottom: '20px', fontSize: '14px' }}>
-                    Başarıyla giriş yaptınız. Bu alanda ileride arşivlediğiniz serileri, istatistiklerinizi ve yönetimsel ayarları
-                    düzenleyebileceksiniz.
-                </p>
+                <div style={{ display: 'flex', gap: '20px', marginBottom: '25px' }}>
+                    <div style={{ flex: 1, backgroundColor: '#fff', padding: '20px', border: '1px solid #c2bba8', borderRadius: '4px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)' }}>
+                        <h3 style={{ fontSize: '13px', color: '#666', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '1px' }}>Toplam Anime</h3>
+                        <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#3b5323', textShadow: '1px 1px 0px #eee' }}>0</p>
+                    </div>
+                    <div style={{ flex: 1, backgroundColor: '#fff', padding: '20px', border: '1px solid #c2bba8', borderRadius: '4px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)' }}>
+                        <h3 style={{ fontSize: '13px', color: '#666', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '1px' }}>Toplam Bölüm</h3>
+                        <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#3b5323', textShadow: '1px 1px 0px #eee' }}>0</p>
+                    </div>
+                </div>
 
                 <div style={{ backgroundColor: '#fff', padding: '15px', border: '1px solid #c2bba8', borderRadius: '4px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
                     <h3 style={{ fontSize: '15px', marginBottom: '10px', color: '#3b5323' }}>Hızlı İşlemler</h3>
                     <p style={{ fontSize: '13px', color: '#666', margin: '10px 0 15px 0' }}>Sistemde bekleyen bir video işleme bulunmuyor.</p>
                     <button class="btn btn-auto">Yeni Anime Yükle</button>
                     <button class="btn btn-auto" style={{ marginLeft: '10px', background: 'linear-gradient(to bottom, #dcdcdc 0%, #c0c0c0 100%)', borderColor: '#888', color: '#333', textShadow: '1px 1px 0 #fff' }}>Arşivi İncele</button>
+                </div>
+            </div>
+
+            <div class="toast-container">
+                <div class="toast">
+                    <strong>Bilgi:</strong> Sisteme başarıyla giriş yaptınız.
                 </div>
             </div>
         </Layout>

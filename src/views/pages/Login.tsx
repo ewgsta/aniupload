@@ -2,20 +2,15 @@ import type { FC } from 'hono/jsx';
 import { Layout } from '../components/Layout.js';
 
 export const Login: FC<{ error?: string }> = ({ error }) => {
+    const isErrorReal = error ? !error.toLowerCase().includes('başarılı') : false;
+
     return (
         <Layout title="AniUpload - Giriş">
             <div class="center-layout">
                 <div class="panel-card">
                     <div class="card-header">
                         <h1>AniUpload</h1>
-                        <p>Arşive giriş yap</p>
                     </div>
-
-                    {error && (
-                        <div style={{ padding: '10px', backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca', marginBottom: '15px', borderRadius: '4px', fontSize: '13px', textAlign: 'center' }}>
-                            {error}
-                        </div>
-                    )}
 
                     <form action="/login" method="post">
                         <div class="form-group">
@@ -32,6 +27,16 @@ export const Login: FC<{ error?: string }> = ({ error }) => {
                     </form>
                 </div>
             </div>
+
+            {error && (
+                <div class="toast-container">
+                    <div class="toast" style={{ borderLeftColor: isErrorReal ? '#991b1b' : '#6b8e23' }}>
+                        <strong style={{ color: isErrorReal ? '#991b1b' : '#6b8e23' }}>
+                            {isErrorReal ? 'Hata:' : 'Bilgi:'}
+                        </strong> {error}
+                    </div>
+                </div>
+            )}
         </Layout>
     );
 };
