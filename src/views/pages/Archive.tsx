@@ -79,26 +79,12 @@ export const Archive: FC<{ username: string; animes: AnimeRow[] }> = ({ username
                                             </td>
                                             <td style={{ padding: '10px 12px', color: '#888', fontSize: '12px' }}>{anime.created_at ? new Date(anime.created_at).toLocaleDateString('tr-TR') : '--'}</td>
                                             <td style={{ padding: '10px 12px', textAlign: 'center' }}>
-                                                <button class="btn btn-small" style={{ fontSize: '11px', padding: '3px 8px', background: 'linear-gradient(to bottom,#f5f5f5,#ddd)', color: '#333', borderColor: '#aaa', textShadow: 'none', marginRight: '5px' }}
-                                                    onclick={`toggleDetail(${anime.id})`}>Detay</button>
+                                                <a href={`/archive/${anime.id}`} class="btn btn-small" style={{ fontSize: '11px', padding: '3px 8px', textDecoration: 'none', background: 'linear-gradient(to bottom,#f5f5f5,#ddd)', color: '#333', borderColor: '#aaa', textShadow: 'none', marginRight: '5px' }}>Detay</a>
                                                 {!isComplete && (
-                                                    <a href="/upload" class="btn btn-small" style={{ fontSize: '11px', padding: '3px 8px', textDecoration: 'none', background: 'linear-gradient(to bottom, #7ba05b 0%, #5a7d3c 100%)', marginRight: '5px' }}>Bolum Ekle</a>
+                                                    <a href={`/upload?anime_id=${anime.id}`} class="btn btn-small" style={{ fontSize: '11px', padding: '3px 8px', textDecoration: 'none', background: 'linear-gradient(to bottom, #7ba05b 0%, #5a7d3c 100%)', marginRight: '5px' }}>Bolum Ekle</a>
                                                 )}
                                                 <button class="btn btn-small" style={{ fontSize: '11px', padding: '3px 8px', background: 'linear-gradient(to bottom,#dc6969,#b22222)', color: '#fff', borderColor: '#8b0000', textShadow: 'none' }}
                                                     onclick={`if(confirm('${anime.title} arsivden silinsin mi?')) deleteAnime(${anime.id})`}>Sil</button>
-                                            </td>
-                                        </tr>
-                                        <tr id={`detail-${anime.id}`} style={{ display: 'none' }}>
-                                            <td colspan={7} style={{ padding: '0', backgroundColor: '#f5f3ed' }}>
-                                                <div style={{ padding: '15px 20px', borderTop: '1px dashed #c2bba8' }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                                                        <strong style={{ color: '#3b5323', fontSize: '13px' }}>Yuklenen Bolumler</strong>
-                                                        <span id={`detail-status-${anime.id}`} style={{ fontSize: '12px', color: '#888' }}>Yukleniyor...</span>
-                                                    </div>
-                                                    <div id={`episodes-list-${anime.id}`} style={{ fontSize: '12px' }}>
-                                                        <p style={{ color: '#888', fontStyle: 'italic' }}>Veriler cekiliyor...</p>
-                                                    </div>
-                                                </div>
                                             </td>
                                         </tr>
                                     </>
@@ -109,7 +95,7 @@ export const Archive: FC<{ username: string; animes: AnimeRow[] }> = ({ username
                 )}
             </div>
 
-            {/* Toast for copy feedback */}
+            {/* Notification Toast */}
             <div id="copy-toast" style={{
                 display: 'none', position: 'fixed', bottom: '20px', right: '20px',
                 backgroundColor: '#f9f6f0', border: '1px solid #c2bba8', borderLeft: '4px solid #6b8e23',
@@ -126,81 +112,7 @@ export const Archive: FC<{ username: string; animes: AnimeRow[] }> = ({ username
                     const t = document.getElementById('copy-toast');
                     document.getElementById('copy-toast-msg').innerText = msg || 'URL kopyalandi!';
                     t.style.display = 'block';
-                    setTimeout(() => { t.style.display = 'none'; }, 3000);
-                }
-
-                function copyUrl(url) {
-                    navigator.clipboard.writeText(url).then(() => showCopyToast('URL kopyalandi!'));
-                }
-
-                function copyAllUrls(animeId) {
-                    const container = document.getElementById('episodes-list-' + animeId);
-                    const links = container.querySelectorAll('[data-url]');
-                    const urls = [];
-                    links.forEach(el => urls.push(el.getAttribute('data-url')));
-                    navigator.clipboard.writeText(urls.join('\\n')).then(() => showCopyToast(urls.length + ' URL kopyalandi!'));
-                }
-
-                function toggleDetail(animeId) {
-                    const row = document.getElementById('detail-' + animeId);
-                    if (row.style.display === 'none') {
-                        row.style.display = 'table-row';
-                        loadEpisodes(animeId);
-                    } else {
-                        row.style.display = 'none';
-                    }
-                }
-
-                function loadEpisodes(animeId) {
-                    const container = document.getElementById('episodes-list-' + animeId);
-                    const statusEl = document.getElementById('detail-status-' + animeId);
-
-                    fetch('/api/v1/upload/anime/' + animeId + '/episodes')
-                        .then(r => r.json())
-                        .then(data => {
-                            if (!data.episodes || data.episodes.length === 0) {
-                                container.innerHTML = '<p style="color: #888; font-style: italic;">Henuz bu anime icin bolum yuklenmemis.</p>';
-                                statusEl.innerText = '0 bolum';
-                                return;
-                            }
-                            statusEl.innerText = data.episodes.length + ' bolum yuklendi';
-
-                            let html = '<div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">' +
-                                        '<button class="btn btn-small" style="font-size:11px; padding:2px 8px; background:#eee; color:#333; border-color:#ccc; text-shadow:none;" onclick="copyAllUrls(' + animeId + ')">Tum URL\\'leri Kopyala</button></div>';
-                            html += '<table style="width:100%; border-collapse:collapse; font-size:12px;">';
-                            html += '<tr style="background:#e8e0d0;"><th style="padding:6px 10px; text-align:left;">S/B</th><th style="padding:6px 10px; text-align:left;">Servisler</th><th style="padding:6px 10px; text-align:left;">Tarih</th></tr>';
-
-                            data.episodes.forEach(ep => {
-                                let services = {};
-                                try { services = JSON.parse(ep.services || '{}'); } catch(e) {}
-                                const serviceKeys = Object.keys(services);
-
-                                let serviceHtml = '';
-                                if (serviceKeys.length === 0) {
-                                    serviceHtml = '<span style="color:#ccc;">--</span>';
-                                } else {
-                                    serviceKeys.forEach(key => {
-                                        const url = services[key];
-                                        serviceHtml += '<span style="display:inline-flex; align-items:center; gap:4px; margin-right:10px; background:#fff; border:1px solid #ddd; padding:2px 6px; border-radius:3px;" data-url="' + url + '">' +
-                                            '<strong style="color:#3b5323;">' + key + '</strong> ' +
-                                            '<a href="' + url + '" target="_blank" style="color:#2e51a2; text-decoration:none; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:inline-block; font-size:11px;">' + url + '</a> ' +
-                                            '<button style="background:none; border:none; cursor:pointer; color:#666; font-size:11px; padding:0 2px;" onclick="copyUrl(\\'' + url + '\\')">[ Kopyala ]</button>' +
-                                            '</span>';
-                                    });
-                                }
-
-                                const dateStr = ep.created_at ? new Date(ep.created_at).toLocaleDateString('tr-TR') : '--';
-                                html += '<tr style="border-bottom:1px solid #eee;"><td style="padding:6px 10px; font-weight:bold;">S' + ep.season + ' B' + ep.episode + '</td>' +
-                                        '<td style="padding:6px 10px;">' + serviceHtml + '</td>' +
-                                        '<td style="padding:6px 10px; color:#888;">' + dateStr + '</td></tr>';
-                            });
-                            html += '</table>';
-                            container.innerHTML = html;
-                        })
-                        .catch(e => {
-                            container.innerHTML = '<p style="color:#991b1b;">Veri cekilemedi.</p>';
-                            statusEl.innerText = 'Hata';
-                        });
+                    setTimeout(() => { t.style.display = 'none'; }, 2500);
                 }
 
                 function deleteAnime(id) {

@@ -11,6 +11,7 @@ import { Dashboard } from './views/pages/Dashboard.js';
 import { Upload } from './views/pages/Upload.js';
 import { Login } from './views/pages/Login.js';
 import { Archive } from './views/pages/Archive.js';
+import { ArchiveDetail } from './views/pages/ArchiveDetail.js';
 import { AuthService } from './services/auth.service.js';
 import { initDb, db } from './db/index.js';
 
@@ -117,6 +118,33 @@ app.get('/archive', async (c) => {
             FROM animes a ORDER BY a.created_at DESC
         `);
         return c.html(<Archive username={payload.username as string} animes={animesResult.rows as any} />);
+    } catch {
+        return c.redirect('/?error=Oturum süresi doldu.');
+    }
+});
+
+app.get('/archive/:id', async (c) => {
+    const token = getCookie(c, 'auth_token');
+    const id = c.req.param('id');
+    if (!token) return c.redirect('/?error=Lütfen giriş yapın.');
+    try {
+        const payload = await verify(token, JWT_SECRET, 'HS256');
+        const animeRes = await db.execute({
+            sql: 'SELECT * FROM animes WHERE id = ?',
+            args: [id]
+        });
+        if (animeRes.rows.length === 0) return c.notFound();
+
+        const episodesRes = await db.execute({
+            sql: 'SELECT * FROM episodes WHERE anime_id = ? ORDER BY season ASC, episode ASC',
+            args: [id]
+        });
+
+        return c.html(<ArchiveDetail
+            username={payload.username as string}
+            anime={animeRes.rows[0] as any}
+            episodes={episodesRes.rows as any}
+        />);
     } catch {
         return c.redirect('/?error=Oturum süresi doldu.');
     }
