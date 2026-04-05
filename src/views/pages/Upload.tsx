@@ -1,6 +1,6 @@
 import type { FC } from 'hono/jsx';
 import { Layout } from '../components/Layout.js';
-import { html } from 'hono/html';
+import { html, raw } from 'hono/html';
 
 export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username, savedAnimes = [] }) => {
     return (
@@ -30,13 +30,13 @@ export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username
                         <div style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '4px', border: '1px solid #c2bba8', marginBottom: '15px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)', position: 'relative' }}>
                             <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#3b5323', display: 'block', marginBottom: '5px' }}>Daha Once Eklenenlerden Sec</label>
                             <div id="combo-box" style={{ position: 'relative' }}>
-                                <div id="combo-trigger" class="form-input" onclick="toggleCombo()" style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', userSelect: 'none' }}>
-                                    <span id="combo-label" style={{ color: '#888' }}>Anime secin...</span>
-                                    <span style={{ color: '#666', fontSize: '10px' }}>&#9660;</span>
+                                <div id="combo-trigger" class="form-input" style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', userSelect: 'none' }}>
+                                    <span id="combo-label" style={{ color: '#666', pointerEvents: 'none' }}>Bir anime secin veya arayin...</span>
+                                    <span style={{ color: '#999', fontSize: '10px', pointerEvents: 'none' }}>&#9660;</span>
                                 </div>
                                 <div id="combo-panel" style={{ display: 'none', position: 'absolute', left: 0, right: 0, top: '100%', marginTop: '2px', backgroundColor: '#fff', border: '1px solid #c2bba8', borderRadius: '0 0 4px 4px', boxShadow: '0 6px 16px rgba(0,0,0,0.2)', zIndex: 200, overflow: 'hidden' }}>
                                     <div style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
-                                        <input type="text" id="combo-search" class="form-input" placeholder="Ara..." autocomplete="off" oninput="filterComboItems()" style={{ fontSize: '12px', padding: '6px 8px' }} />
+                                        <input type="text" id="combo-search" class="form-input" placeholder="Ara..." autocomplete="off" style={{ fontSize: '12px', padding: '6px 8px' }} />
                                     </div>
                                     <div id="combo-list" style={{ maxHeight: '180px', overflowY: 'auto' }}>
                                     </div>
@@ -244,8 +244,7 @@ export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username
                 }
 
                 let seasonCount = 0;
-                
-                const savedAnimes = ${JSON.stringify(savedAnimes)};
+                const savedAnimes = ${raw(JSON.stringify(savedAnimes))};
                 
                 function fillFromSavedAnime(data) {
                     document.getElementById('anime-title').value = data.title;
@@ -268,11 +267,9 @@ export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username
                     } catch(e) {
                          reindexSeasons();
                     }
-                    // Fetch completed status message update
                     const status = document.getElementById('mal-status');
                     status.style.display = 'block';
-                    status.innerText = "Lokal veritabanından başarıyla yüklendi! (" + data.title + ")";
-                    status.style.color = "#3b5323";
+                    status.innerText = "Lokal veritabanından başarıyla yüklendi! (" + data.title + ")"; status.style.color = "#3b5323";
                 }
 
                 function handleSavedSelect(title) {
@@ -285,50 +282,66 @@ export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username
                     }
                 }
 
-                let comboOpen = false;
-                function toggleCombo() {
-                    comboOpen = !comboOpen;
-                    const panel = document.getElementById('combo-panel');
-                    if (comboOpen) {
-                        panel.style.display = 'block';
-                        renderComboItems(savedAnimes);
-                        const search = document.getElementById('combo-search');
-                        search.value = '';
-                        setTimeout(() => search.focus(), 50);
-                    } else {
-                        panel.style.display = 'none';
-                    }
-                }
-
                 function filterComboItems() {
-                    const val = document.getElementById('combo-search').value.toLowerCase();
+                    const search = document.getElementById('combo-search');
+                    if (!search) return;
+                    const val = search.value.toLowerCase();
                     const filtered = savedAnimes.filter(a => a.title.toLowerCase().includes(val));
                     renderComboItems(filtered);
                 }
 
                 function renderComboItems(items) {
                     const list = document.getElementById('combo-list');
+                    if (!list) return;
                     if (items.length === 0) {
                         list.innerHTML = '<div style="padding:12px; color:#888; font-style:italic; text-align:center; font-size:12px;">Sonuc bulunamadi</div>';
                         return;
                     }
-                    list.innerHTML = items.map(a =>
-                        '<div style="padding:8px 12px; cursor:pointer; border-bottom:1px solid #f5f5f0; font-size:13px; transition:background 0.15s;" ' +
-                        'onmouseover="this.style.backgroundColor=\'#eef5e5\'" onmouseout="this.style.backgroundColor=\'#fff\'" ' +
-                        'onclick="handleSavedSelect(\'' + a.title.replace(/'/g, "\\'") + '\')">' +
-                        '<strong>' + a.title + '</strong>' +
-                        (a.mal_id ? ' <span style="color:#999; font-size:11px;">(MAL: ' + a.mal_id + ')</span>' : '') +
-                        '</div>'
-                    ).join('');
+                    list.innerHTML = '';
+                    items.forEach(function(a) {
+                        const item = document.createElement('div');
+                        item.style.cssText = 'padding:10px 12px; cursor:pointer; border-bottom:1px solid #f5f5f0; font-size:13px; transition: background 0.2s;';
+                        item.innerHTML = '<strong>' + a.title + '</strong>' + (a.mal_id ? ' <span style="color:#999; font-size:11px;">(MAL: ' + a.mal_id + ')</span>' : '');
+                        item.addEventListener('mouseover', function() { this.style.backgroundColor = '#f0f4e8'; });
+                        item.addEventListener('mouseout', function() { this.style.backgroundColor = '#fff'; });
+                        item.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            handleSavedSelect(a.title);
+                        });
+                        list.appendChild(item);
+                    });
                 }
 
-                // Close dropdown when clicking outside
-                document.addEventListener('click', function(e) {
-                    const box = document.getElementById('combo-box');
-                    if (box && !box.contains(e.target)) {
-                        document.getElementById('combo-panel').style.display = 'none';
-                        comboOpen = false;
+                document.addEventListener('DOMContentLoaded', () => {
+                    const trigger = document.getElementById('combo-trigger');
+                    const panel = document.getElementById('combo-panel');
+                    const search = document.getElementById('combo-search');
+
+                    if (trigger && panel) {
+                        trigger.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const isHidden = panel.style.display === 'none';
+                            panel.style.display = isHidden ? 'block' : 'none';
+                            if (isHidden) {
+                                renderComboItems(savedAnimes);
+                                if (search) {
+                                    search.value = '';
+                                    setTimeout(() => search.focus(), 10);
+                                }
+                            }
+                        });
                     }
+
+                    if (search) {
+                        search.addEventListener('input', filterComboItems);
+                        search.addEventListener('click', (e) => e.stopPropagation());
+                    }
+
+                    document.addEventListener('click', (e) => {
+                        if (panel && !panel.contains(e.target) && e.target !== trigger) {
+                            panel.style.display = 'none';
+                        }
+                    });
                 });
 
                 function addSeasonRow() {
