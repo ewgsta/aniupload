@@ -167,6 +167,7 @@ body {
 }
 
 .toast {
+    position: relative;
     background-color: #f9f6f0;
     border: 1px solid #c2bba8;
     border-left: 4px solid #6b8e23;
@@ -176,18 +177,45 @@ body {
     font-size: 13px;
     color: #333;
     min-width: 250px;
-    animation: fadein 0.5s;
+    overflow: hidden;
+    animation: fadein 0.5s forwards;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.toast.hide {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background-color: #6b8e23;
+    width: 100%;
+    animation: toast-progress-anim 3s linear forwards;
 }
 
 @keyframes fadein {
     from {
-        bottom: 0;
+        bottom: -20px;
         opacity: 0;
     }
 
     to {
-        bottom: 20px;
+        bottom: 0px;
         opacity: 1;
+    }
+}
+
+@keyframes toast-progress-anim {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
     }
 }
 

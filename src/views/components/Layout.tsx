@@ -1,5 +1,7 @@
 import type { FC } from 'hono/jsx';
 
+import { html } from 'hono/html';
+
 export const Layout: FC<{ title?: string; children?: any }> = (props) => {
     return (
         <html lang="tr">
@@ -11,6 +13,19 @@ export const Layout: FC<{ title?: string; children?: any }> = (props) => {
             </head>
             <body>
                 {props.children}
+                {html`
+                <script>
+                    document.addEventListener("DOMContentLoaded", () => {
+                        const toasts = document.querySelectorAll('.toast');
+                        toasts.forEach(toast => {
+                            setTimeout(() => {
+                                toast.classList.add('hide');
+                                setTimeout(() => toast.remove(), 400);
+                            }, 3000);
+                        });
+                    });
+                </script>
+                `}
             </body>
         </html>
     );

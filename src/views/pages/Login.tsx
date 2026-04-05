@@ -34,6 +34,7 @@ export const Login: FC<{ error?: string }> = ({ error }) => {
                         <strong style={{ color: isErrorReal ? '#991b1b' : '#6b8e23' }}>
                             {isErrorReal ? 'Hata:' : 'Bilgi:'}
                         </strong> {error}
+                        <div class="toast-progress" style={{ backgroundColor: isErrorReal ? '#991b1b' : '#6b8e23' }}></div>
                     </div>
                 </div>
             )}

@@ -78,7 +78,8 @@ app.get('/dashboard', async (c) => {
     try {
         const payload = await verify(token, JWT_SECRET, 'HS256');
         // Valid token
-        return c.html(<Dashboard username={payload.username as string} />);
+        const success = c.req.query('success') === 'true';
+        return c.html(<Dashboard username={payload.username as string} showSuccessToast={success} />);
     } catch (e) {
         deleteCookie(c, 'auth_token', { path: '/' });
         return c.redirect('/?error=Oturum süresi doldu, tekrar giriş yapın.');

@@ -1,7 +1,7 @@
 import type { FC } from 'hono/jsx';
 import { Layout } from '../components/Layout.js';
 
-export const Dashboard: FC<{ username: string }> = ({ username }) => {
+export const Dashboard: FC<{ username: string; showSuccessToast?: boolean }> = ({ username, showSuccessToast }) => {
     return (
         <Layout title="AniUpload - Dashboard">
             <nav class="transparent-nav">
@@ -36,11 +36,14 @@ export const Dashboard: FC<{ username: string }> = ({ username }) => {
                 </div>
             </div>
 
-            <div class="toast-container">
-                <div class="toast">
-                    <strong>Bilgi:</strong> Sisteme başarıyla giriş yaptınız.
+            {showSuccessToast && (
+                <div class="toast-container">
+                    <div class="toast">
+                        <strong>Bilgi:</strong> Sisteme başarıyla giriş yaptınız.
+                        <div class="toast-progress"></div>
+                    </div>
                 </div>
-            </div>
+            )}
         </Layout>
     );
 };
