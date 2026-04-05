@@ -48,9 +48,10 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
 
                         <div id="seasons-container" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             <div class="season-row" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#fff', border: '1px solid #eee', padding: '10px', borderRadius: '4px' }}>
-                                <strong style={{ color: '#666', fontSize: '13px', minWidth: '60px' }}>Sezon 1</strong>
+                                <strong class="season-label" style={{ color: '#666', fontSize: '13px', minWidth: '60px' }}>Sezon 1</strong>
                                 <input type="number" class="form-input season-episodes-input" value="12" min="1" placeholder="Bölüm" style={{ flex: 1 }} />
                                 <span style={{ fontSize: '13px', color: '#999' }}>Bölüm</span>
+                                <span style={{ width: '20px' }}></span> {/* Spacer for alignment with others that have delete button */}
                             </div>
                         </div>
                     </div>
@@ -192,10 +193,25 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
                     row.style.border = '1px solid #eee';
                     row.style.padding = '10px';
                     row.style.borderRadius = '4px';
-                    row.innerHTML = '<strong style="color: #666; font-size: 13px; min-width: 60px;">Sezon ' + seasonCount + '</strong>' +
+                    row.innerHTML = '<strong class="season-label" style="color: #666; font-size: 13px; min-width: 60px;">Sezon ' + seasonCount + '</strong>' +
                                     '<input type="number" class="form-input season-episodes-input" value="12" min="1" placeholder="Bölüm" style="flex: 1;" />' +
-                                    '<span style="font-size: 13px; color: #999;">Bölüm</span>';
+                                    '<span style="font-size: 13px; color: #999;">Bölüm</span>' +
+                                    '<button type="button" style="background: transparent; color: #991b1b; border: none; padding: 0; cursor: pointer; font-size: 14px; width: 20px;" onclick="removeSeasonRow(this)" title="Sil">✖</button>';
                     container.appendChild(row);
+                }
+
+                function removeSeasonRow(btn) {
+                    btn.parentNode.remove();
+                    reindexSeasons();
+                }
+
+                function reindexSeasons() {
+                    const rows = document.querySelectorAll('.season-row');
+                    seasonCount = rows.length;
+                    rows.forEach((row, index) => {
+                        const label = row.querySelector('.season-label');
+                        if (label) label.innerText = 'Sezon ' + (index + 1);
+                    });
                 }
 
                 function fetchMalData() {
