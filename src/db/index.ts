@@ -35,16 +35,20 @@ export const initDb = async () => {
       CREATE TABLE IF NOT EXISTS animes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT UNIQUE NOT NULL,
+        mal_id INTEGER,
         seasons_data TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
+    // Geçmiş tabloyu yeni JSON yapısına uydurmak için
     try {
         await db.execute('ALTER TABLE animes ADD COLUMN seasons_data TEXT');
-    } catch (e) {
-        // siktir et.
-    }
+    } catch (e) { }
+
+    try {
+        await db.execute('ALTER TABLE animes ADD COLUMN mal_id INTEGER');
+    } catch (e) { }
 
     console.log('[DB] Database initialized successfully.');
 };

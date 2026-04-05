@@ -92,7 +92,8 @@ app.get('/upload', async (c) => {
     if (!token) return c.redirect('/?error=Lütfen giriş yapın.');
     try {
         const payload = await verify(token, JWT_SECRET, 'HS256');
-        return c.html(<Upload username={payload.username as string} />);
+        const animesResult = await db.execute('SELECT id, mal_id, title, seasons_data FROM animes ORDER BY created_at DESC');
+        return c.html(<Upload username={payload.username as string} savedAnimes={animesResult.rows as any} />);
     } catch {
         return c.redirect('/?error=Oturum süresi doldu.');
     }
@@ -112,13 +113,14 @@ apiV1.post('/upload/metadata', async (c) => {
         }
 
         const title = body.title as string;
+        const malId = body.mal_id ? parseInt(body.mal_id as string) : null;
         const seasonsData = body.seasons_data as string || '[]';
 
         if (title) {
             await db.execute({
-                sql: `INSERT INTO animes (title, seasons_data) VALUES (?, ?)
-                      ON CONFLICT(title) DO UPDATE SET seasons_data=excluded.seasons_data`,
-                args: [title, seasonsData]
+                sql: `INSERT INTO animes (title, mal_id, seasons_data) VALUES (?, ?, ?)
+                      ON CONFLICT(title) DO UPDATE SET seasons_data=excluded.seasons_data, mal_id=excluded.mal_id`,
+                args: [title, malId, seasonsData]
             });
             return c.json({ status: 'ok' });
         }

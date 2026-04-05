@@ -2,7 +2,7 @@ import type { FC } from 'hono/jsx';
 import { Layout } from '../components/Layout.js';
 import { html } from 'hono/html';
 
-export const Upload: FC<{ username: string }> = ({ username }) => {
+export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username, savedAnimes = [] }) => {
     return (
         <Layout title="AniUpload - Yeni Anime Yükle">
             <nav class="transparent-nav">
@@ -24,6 +24,19 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
                 {/* STEP 1 */}
                 <div id="step-1" class="upload-step">
                     <h3 style={{ marginBottom: '15px', color: '#3b5323' }}>Anime Bilgisi</h3>
+
+                    {/* Kayıtlı Animeler / Arşiv Arama */}
+                    {savedAnimes.length > 0 && (
+                        <div style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '4px', border: '1px solid #c2bba8', marginBottom: '15px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)' }}>
+                            <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#3b5323', display: 'block', marginBottom: '5px' }}>Daha Önce Eklenenlerden Seç</label>
+                            <input type="text" list="saved-animes-datalist" id="saved-animes-input" class="form-input" placeholder="Arşivde anime ara (Tıklayınca otomatik metadatalar dolar)..." onchange="handleSavedSelect()" />
+                            <datalist id="saved-animes-datalist">
+                                {savedAnimes.map(a => (
+                                    <option value={a.title} />
+                                ))}
+                            </datalist>
+                        </div>
+                    )}
 
                     {/* MAL ID Fethcer */}
                     <div style={{ backgroundColor: '#eef5e5', padding: '15px', borderRadius: '4px', border: '1px solid #c2bba8', marginBottom: '15px' }}>
@@ -224,6 +237,44 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
                 }
 
                 let seasonCount = 0;
+                
+                const savedAnimes = ${JSON.stringify(savedAnimes)};
+                
+                function fillFromSavedAnime(data) {
+                    document.getElementById('anime-title').value = data.title;
+                    document.getElementById('mal-id').value = data.mal_id || '';
+                    
+                    const container = document.getElementById('seasons-container');
+                    container.innerHTML = '';
+                    seasonCount = 0;
+                    
+                    try {
+                        const seasons = JSON.parse(data.seasons_data || '[]');
+                        if(seasons.length > 0) {
+                            seasons.forEach(s => {
+                                const row = addSeasonRow();
+                                row.querySelector('.season-episodes-input').value = s.episodes;
+                            });
+                        } else {
+                            reindexSeasons();
+                        }
+                    } catch(e) {
+                         reindexSeasons();
+                    }
+                    // Fetch completed status message update
+                    const status = document.getElementById('mal-status');
+                    status.style.display = 'block';
+                    status.innerText = "Lokal veritabanından başarıyla yüklendi! (" + data.title + ")";
+                    status.style.color = "#3b5323";
+                }
+
+                function handleSavedSelect() {
+                    const val = document.getElementById('saved-animes-input').value;
+                    if(!val) return;
+                    const anime = savedAnimes.find(a => a.title === val);
+                    if(anime) fillFromSavedAnime(anime);
+                }
+
                 function addSeasonRow() {
                     const noSeasonText = document.getElementById('no-season-text');
                     if(noSeasonText) noSeasonText.style.display = 'none';
@@ -244,6 +295,7 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
                                     '<span style="font-size: 13px; color: #999;">Bölüm</span>' +
                                     '<button type="button" style="background: transparent; color: #991b1b; border: none; padding: 0; cursor: pointer; font-size: 14px; width: 20px;" onclick="removeSeasonRow(this)" title="Sil">✖</button>';
                     container.appendChild(row);
+                    return row;
                 }
 
                 function removeSeasonRow(btn) {
@@ -269,7 +321,16 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
                 function fetchMalData() {
                     const malId = document.getElementById('mal-id').value;
                     if(!malId) return;
+                    
                     const status = document.getElementById('mal-status');
+                    
+                    // Local DB Check First
+                    const existing = savedAnimes.find(a => String(a.mal_id) === malId);
+                    if(existing) {
+                        fillFromSavedAnime(existing);
+                        return;
+                    }
+
                     status.style.display = 'block';
                     status.innerText = "Jikan API'den bilgi çekiliyor...";
                     status.style.color = "#666";
@@ -351,11 +412,14 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
                         seasonsData.push({ season: index + 1, episodes: parseInt(input.value) || 1 });
                     });
                     
+                    const malId = document.getElementById('mal-id').value;
+
                     fetch('/api/v1/upload/metadata', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({
                             title: title,
+                            mal_id: malId,
                             seasons_data: JSON.stringify(seasonsData)
                         })
                     }).catch(console.error);
