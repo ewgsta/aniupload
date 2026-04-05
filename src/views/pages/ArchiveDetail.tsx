@@ -86,17 +86,18 @@ export const ArchiveDetail: FC<{ username: string; anime: Anime; episodes: Episo
                                     return (
                                         <tr style={{ borderBottom: '1px solid #f0f0f0', backgroundColor: idx % 2 === 1 ? '#fafafa' : '#fff' }}>
                                             <td style={{ padding: '12px', fontWeight: 'bold', color: '#3b5323' }}>
-                                                S{ep.season.toString().padStart(2, '0')} E{ep.episode.toString().padStart(2, '0')}
+                                                <div style={{ marginBottom: '5px' }}>S{ep.season.toString().padStart(2, '0')} E{ep.episode.toString().padStart(2, '0')}</div>
+                                                <button onclick="copyRowUrls(this)" class="btn btn-small" style={{ fontSize: '10px', padding: '2px 5px', margin: 0, textShadow: 'none', background: '#f0f0f0', color: '#333', borderColor: '#ccc' }}>Tümünü Kopyala</button>
                                             </td>
                                             <td style={{ padding: '12px' }}>
                                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                                                     {serviceKeys.map(key => {
                                                         const url = services[key];
                                                         return (
-                                                            <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '4px', padding: '2px 8px', fontSize: '12px' }}>
+                                                            <div class="service-box" style={{ display: 'flex', alignItems: 'center', backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '4px', padding: '2px 8px', fontSize: '12px' }}>
                                                                 <span style={{ fontWeight: 'bold', marginRight: '6px', borderRight: '1px solid #eee', paddingRight: '6px' }}>{key}</span>
                                                                 <a href={url} target="_blank" style={{ color: '#2e51a2', textDecoration: 'none', maxWidth: '200px', overflow: 'hidden', textHighlight: 'ellipsis', whiteSpace: 'nowrap' }}>{url}</a>
-                                                                <button onclick={`copyUrl('${url}')`} style={{ background: 'none', border: 'none', cursor: 'pointer', marginLeft: '6px', padding: 0, color: '#666', fontSize: '10px', textDecoration: 'underline' }}>Kopyala</button>
+                                                                <button onclick={`copyUrl('${url.replace(/'/g, "\\'")}')`} style={{ background: 'none', border: 'none', cursor: 'pointer', marginLeft: '6px', padding: 0, color: '#666', fontSize: '10px', textDecoration: 'underline' }}>Kopyala</button>
                                                                 <span class="url-data" style={{ display: 'none' }} data-url={url}></span>
                                                             </div>
                                                         );
@@ -132,11 +133,19 @@ export const ArchiveDetail: FC<{ username: string; anime: Anime; episodes: Episo
                     const t = document.getElementById('copy-toast');
                     document.getElementById('copy-toast-msg').innerText = msg || 'URL kopyalandı!';
                     t.style.display = 'block';
-                    setTimeout(() => { t.style.display = 'none'; }, 3000);
+                    setTimeout(() => { t.style.display = 'none'; }, 2000);
                 }
 
                 function copyUrl(url) {
                     navigator.clipboard.writeText(url).then(() => showCopyToast('URL kopyalandı!'));
+                }
+
+                function copyRowUrls(btn) {
+                    const row = btn.closest('tr');
+                    const urls = [];
+                    row.querySelectorAll('.url-data').forEach(el => urls.push(el.getAttribute('data-url')));
+                    if(urls.length === 0) return;
+                    navigator.clipboard.writeText(urls.join('\\n')).then(() => showCopyToast(urls.length + ' URL kopyalandı!'));
                 }
 
                 function copyAllUrls(animeId) {
