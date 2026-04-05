@@ -1,27 +1,16 @@
 import type { FC } from 'hono/jsx';
 
-export const Layout: FC = (props) => {
+export const Layout: FC<{ title?: string }> = (props) => {
     return (
-        <html>
+        <html lang="tr">
             <head>
-                <title>AniUpload Panel</title>
+                <title>{props.title || 'AniUpload'}</title>
                 <meta charset="utf-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <link rel="stylesheet" href="/css/base.css" />
             </head>
             <body>
-                <header class="header">
-                    <div class="container header-content">
-                        <h1 class="header-title">AniUpload Panel</h1>
-                        <nav>
-                            <a href="/" class="nav-link">Dashboard</a>
-                            <a href="/settings" class="nav-link">Settings</a>
-                        </nav>
-                    </div>
-                </header>
-                <main class="container main-content">
-                    {props.children}
-                </main>
+                {props.children}
             </body>
         </html>
     );

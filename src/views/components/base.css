@@ -1,80 +1,192 @@
-:root {
-  --primary-color: #4f46e5;
-  --bg-color: #f3f4f6;
-  --text-color: #1f2937;
-  --card-bg: #ffffff;
+/* Temel 2010'lar Reset ve Tipografi */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-  font-family: system-ui, -apple-system, sans-serif;
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  margin: 0;
-  padding: 0;
+    background-color: #87CEEB;
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Clouds_over_the_Atlantic_Ocean.jpg/1280px-Clouds_over_the_Atlantic_Ocean.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
 }
 
-.header {
-  background-color: var(--primary-color);
-  color: white;
-  padding: 1rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+/* Sayfa Ortalama Layout */
+.center-layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
+/* 2012 Tarzı Klasik Konteyner */
+.panel-card {
+    background-color: #f9f6f0;
+    width: 360px;
+    padding: 30px;
+    border: 1px solid #c2bba8;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* Header Kısmı */
+.card-header {
+    text-align: center;
+    margin-bottom: 25px;
+    border-bottom: 1px dotted #ccc;
+    padding-bottom: 15px;
 }
 
-.header-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin: 0;
+.card-header h1 {
+    color: #3b5323;
+    font-size: 24px;
+    font-weight: normal;
+    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8);
+    margin-bottom: 5px;
 }
 
-.nav-link {
-  color: white;
-  text-decoration: none;
-  margin-left: 1rem;
+.card-header p {
+    font-size: 12px;
+    color: #666;
 }
 
-.nav-link:hover {
-  opacity: 0.8;
+/* Form Elemanları */
+.form-group {
+    margin-bottom: 15px;
 }
 
-.main-content {
-  margin-top: 2rem;
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    color: #4a4a4a;
+    margin-bottom: 5px;
 }
 
-.card {
-  background-color: var(--card-bg);
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+/* Klasik Textbox */
+.form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #a9a9a9;
+    border-top-color: #888;
+    border-radius: 3px;
+    background-color: #fff;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    font-family: inherit;
+    font-size: 14px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.card-title {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin-top: 0;
-  margin-bottom: 1rem;
+.form-input:focus {
+    outline: none;
+    border-color: #6b8e23;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05), 0 0 4px rgba(107, 142, 35, 0.3);
 }
 
+/* 2010 Klasik Gradient Buton */
 .btn {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background: linear-gradient(to bottom, #7ba05b 0%, #5a7d3c 100%);
+    border: 1px solid #3b5323;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
+    transition: background 0.3s ease, border-color 0.3s ease;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
 }
+
 .btn:hover {
-  opacity: 0.9;
+    background: linear-gradient(to bottom, #8ab568 0%, #689045 100%);
+}
+
+.btn:active {
+    background: #5a7d3c;
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Footer Linkleri */
+.footer-links {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 12px;
+}
+
+.footer-links a {
+    color: #3b5323;
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+/* Slider Kompanenti */
+.form-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    background: #e0e0e0;
+    border: 1px solid #a9a9a9;
+    outline: none;
+    border-radius: 4px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.form-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: linear-gradient(to bottom, #f9f9f9 0%, #dcdcdc 100%);
+    border: 1px solid #888;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+}
+
+/* Toast Bildirimi Kompanenti */
+.toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 9999;
+}
+
+.toast {
+    background-color: #f9f6f0;
+    border: 1px solid #c2bba8;
+    border-left: 4px solid #6b8e23;
+    border-radius: 4px;
+    padding: 15px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    font-size: 13px;
+    color: #333;
+    min-width: 250px;
+    animation: fadein 0.5s;
+}
+
+@keyframes fadein {
+    from {
+        bottom: 0;
+        opacity: 0;
+    }
+
+    to {
+        bottom: 20px;
+        opacity: 1;
+    }
 }

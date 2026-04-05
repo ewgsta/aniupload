@@ -4,6 +4,7 @@ import { cors } from 'hono/cors';
 import { uploadRoutes } from './routes/upload.routes.js';
 import { logger } from './utils/logger.js';
 import { Dashboard } from './views/pages/Dashboard.js';
+import { Login } from './views/pages/Login.js';
 import { serveStatic } from '@hono/node-server/serve-static';
 
 const app = new Hono();
@@ -19,6 +20,10 @@ app.use('/css/*', serveStatic({
 
 // UI Routes (JSX rendered)
 app.get('/', (c) => {
+    return c.html(<Login />);
+});
+
+app.get('/dashboard', (c) => {
     return c.html(<Dashboard />);
 });
 
