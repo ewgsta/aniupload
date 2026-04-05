@@ -65,27 +65,6 @@ app.post('/login', async (c) => {
     }
 });
 
-app.get('/register', (c) => {
-    const error = c.req.query('error');
-    return c.html(<Register error={error} />);
-});
-
-app.post('/register', async (c) => {
-    const body = await c.req.parseBody();
-    const username = body.username as string;
-    const email = body.email as string;
-    const password = body.password as string;
-
-    const success = await authService.registerUser(username, email, password);
-
-    if (success) {
-        // Hata parametresini bilgilendirme olarak da kullanabiliriz
-        return c.redirect('/?error=Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
-    } else {
-        return c.redirect('/register?error=Bu kullanıcı adı veya e-posta zaten kullanımda.');
-    }
-});
-
 app.get('/logout', (c) => {
     deleteCookie(c, 'auth_token', { path: '/' });
     return c.redirect('/');

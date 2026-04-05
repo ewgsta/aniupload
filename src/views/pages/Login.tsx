@@ -30,10 +30,6 @@ export const Login: FC<{ error?: string }> = ({ error }) => {
 
                         <button type="submit" class="btn">Giriş Yap</button>
                     </form>
-
-                    <div class="footer-links">
-                        <a href="/register">Kayıt Ol</a>
-                    </div>
                 </div>
             </div>
         </Layout>
