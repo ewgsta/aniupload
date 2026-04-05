@@ -21,6 +21,11 @@ export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username
                     <div id="ind-step-4" style={{ color: '#999' }}>4. Hedef Servisler</div>
                 </div>
 
+                <div id="selected-anime-banner" style={{ display: 'none', backgroundColor: '#eef5e5', border: '1px solid #c2bba8', borderLeft: '5px solid #6b8e23', padding: '12px 15px', borderRadius: '4px', marginBottom: '20px', fontSize: '14px' }}>
+                    Şu an <strong id="sab-title" style={{ color: '#3b5323' }}>...</strong> için <strong id="sab-ep" style={{ color: '#3b5323' }}>...</strong> yüklüyorsunuz.
+                    <button class="btn btn-small" style={{ marginLeft: '15px', background: '#fff', color: '#666', border: '1px solid #ccc', fontSize: '11px', textShadow: 'none' }} onclick="window.location.href='/upload'">Değiştir</button>
+                </div>
+
                 {/* STEP 1 */}
                 <div id="step-1" class="upload-step">
                     <h3 style={{ marginBottom: '15px', color: '#3b5323' }}>Anime Bilgisi</h3>
@@ -327,15 +332,26 @@ export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username
 
                     if (isAuto) {
                         const next = getNextEpisode(data.seasons_data);
-                        nextStep(2); // Jump to step 2
                         
-                        // Wait for step 2 inputs to be populated by nextStep(2) logic
+                        // Show banner
+                        const banner = document.getElementById('selected-anime-banner');
+                        if (banner) {
+                            banner.style.display = 'block';
+                            document.getElementById('sab-title').innerText = data.title;
+                            document.getElementById('sab-ep').innerText = "Sezon " + next.season + " Bölüm " + next.episode;
+                        }
+
+                        nextStep(3); // Jump directly to step 3 as requested
+                        
+                        // Wait for step 2 inputs to be populated
                         setTimeout(() => {
                             const sSelect = document.getElementById('target-season');
-                            sSelect.value = next.season;
-                            updateEpisodeDropdown();
-                            const eSelect = document.getElementById('target-episode');
-                            eSelect.value = next.episode;
+                            if (sSelect) {
+                                sSelect.value = next.season;
+                                updateEpisodeDropdown();
+                                const eSelect = document.getElementById('target-episode');
+                                if (eSelect) eSelect.value = next.episode;
+                            }
                         }, 50);
                     }
                 }
