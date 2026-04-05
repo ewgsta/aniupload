@@ -47,12 +47,7 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
                         </label>
 
                         <div id="seasons-container" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <div class="season-row" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#fff', border: '1px solid #eee', padding: '10px', borderRadius: '4px' }}>
-                                <strong class="season-label" style={{ color: '#666', fontSize: '13px', minWidth: '60px' }}>Sezon 1</strong>
-                                <input type="number" class="form-input season-episodes-input" value="12" min="1" placeholder="Bölüm" style={{ flex: 1 }} />
-                                <span style={{ fontSize: '13px', color: '#999' }}>Bölüm</span>
-                                <span style={{ width: '20px' }}></span> {/* Spacer for alignment with others that have delete button */}
-                            </div>
+                            <p id="no-season-text" style={{ fontSize: '13px', color: '#888', fontStyle: 'italic', margin: '5px 0' }}>Henüz sezon eklenmemiş.</p>
                         </div>
                     </div>
 
@@ -180,8 +175,11 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
                     document.querySelectorAll('.server-cb').forEach(cb => cb.checked = true);
                 }
 
-                let seasonCount = 1;
+                let seasonCount = 0;
                 function addSeasonRow() {
+                    const noSeasonText = document.getElementById('no-season-text');
+                    if(noSeasonText) noSeasonText.style.display = 'none';
+
                     seasonCount++;
                     const container = document.getElementById('seasons-container');
                     const row = document.createElement('div');
@@ -208,6 +206,12 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
                 function reindexSeasons() {
                     const rows = document.querySelectorAll('.season-row');
                     seasonCount = rows.length;
+                    
+                    if (seasonCount === 0) {
+                        const noSeasonText = document.getElementById('no-season-text');
+                        if(noSeasonText) noSeasonText.style.display = 'block';
+                    }
+
                     rows.forEach((row, index) => {
                         const label = row.querySelector('.season-label');
                         if (label) label.innerText = 'Sezon ' + (index + 1);
@@ -230,6 +234,7 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
                             if(res.data) {
                                 document.getElementById('anime-title').value = res.data.title || res.data.title_english || '';
                                 if(res.data.episodes) {
+                                    if(seasonCount === 0) addSeasonRow();
                                     const epsInput = document.querySelector('.season-episodes-input');
                                     if(epsInput) epsInput.value = res.data.episodes;
                                 }
@@ -251,6 +256,11 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
                     const title = document.getElementById('anime-title').value;
                     if (!title) {
                         alert("HATA: Lütfen ilk aşamadan Anime Adını girin.");
+                        nextStep(1);
+                        return;
+                    }
+                    if (seasonCount === 0) {
+                        alert("HATA: Lütfen ilk aşamadan en az 1 sezon ekleyin.");
                         nextStep(1);
                         return;
                     }
