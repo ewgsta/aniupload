@@ -61,7 +61,6 @@ export const ArchiveDetail: FC<{ username: string; anime: Anime; episodes: Episo
                 <div style={{ backgroundColor: '#fff', border: '1px solid #c2bba8', borderRadius: '4px', overflow: 'hidden' }}>
                     <div style={{ padding: '12px 15px', backgroundColor: '#e8e0d0', borderBottom: '1px solid #c2bba8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <h3 style={{ margin: 0, color: '#3b5323', fontSize: '15px' }}>Yüklenmiş Bölümler</h3>
-                        <button onclick={`copyAllUrls(${anime.id})`} class="btn btn-small" style={{ margin: 0, textShadow: 'none', background: '#fafaf5', color: '#333', borderColor: '#ccc' }}>Tüm URL'leri Kopyala</button>
                     </div>
 
                     {episodes.length === 0 ? (
@@ -72,7 +71,7 @@ export const ArchiveDetail: FC<{ username: string; anime: Anime; episodes: Episo
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                             <thead>
                                 <tr style={{ backgroundColor: '#f9f6f0', borderBottom: '1px solid #eee' }}>
-                                    <th style={{ padding: '12px', textAlign: 'left', width: '100px' }}>Sezon / Bölüm</th>
+                                    <th style={{ padding: '12px', textAlign: 'center', width: '100px' }}>Sezon / Bölüm</th>
                                     <th style={{ padding: '12px', textAlign: 'left' }}>Yayınlandığı Servisler & Bağlantılar</th>
                                     <th style={{ padding: '12px', textAlign: 'right', width: '120px' }}>Yükleme Tarihi</th>
                                 </tr>
@@ -85,7 +84,7 @@ export const ArchiveDetail: FC<{ username: string; anime: Anime; episodes: Episo
 
                                     return (
                                         <tr style={{ borderBottom: '1px solid #f0f0f0', backgroundColor: idx % 2 === 1 ? '#fafafa' : '#fff' }}>
-                                            <td style={{ padding: '12px', fontWeight: 'bold', color: '#3b5323' }}>
+                                            <td style={{ padding: '12px', fontWeight: 'bold', color: '#3b5323', textAlign: 'center' }}>
                                                 <div style={{ marginBottom: '5px' }}>S{ep.season.toString().padStart(2, '0')} E{ep.episode.toString().padStart(2, '0')}</div>
                                                 <button onclick="copyRowUrls(this)" class="btn btn-small" style={{ fontSize: '10px', padding: '2px 5px', margin: 0, textShadow: 'none', background: '#f0f0f0', color: '#333', borderColor: '#ccc' }}>Tümünü Kopyala</button>
                                             </td>
