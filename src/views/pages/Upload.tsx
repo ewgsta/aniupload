@@ -29,9 +29,18 @@ export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username
                     {savedAnimes.length > 0 && (
                         <div style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '4px', border: '1px solid #c2bba8', marginBottom: '15px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)', position: 'relative' }}>
                             <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#3b5323', display: 'block', marginBottom: '5px' }}>Daha Once Eklenenlerden Sec</label>
-                            <input type="text" id="saved-animes-input" class="form-input" placeholder="Arsivde anime ara..." autocomplete="off"
-                                oninput="filterSavedAnimes()" onfocus="filterSavedAnimes()" />
-                            <div id="saved-animes-dropdown" style={{ display: 'none', position: 'absolute', left: '15px', right: '15px', top: '100%', marginTop: '-10px', backgroundColor: '#fff', border: '1px solid #c2bba8', borderTop: 'none', borderRadius: '0 0 4px 4px', maxHeight: '180px', overflowY: 'auto', zIndex: 100, boxShadow: '0 4px 8px rgba(0,0,0,0.15)' }}>
+                            <div id="combo-box" style={{ position: 'relative' }}>
+                                <div id="combo-trigger" class="form-input" onclick="toggleCombo()" style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', userSelect: 'none' }}>
+                                    <span id="combo-label" style={{ color: '#888' }}>Anime secin...</span>
+                                    <span style={{ color: '#666', fontSize: '10px' }}>&#9660;</span>
+                                </div>
+                                <div id="combo-panel" style={{ display: 'none', position: 'absolute', left: 0, right: 0, top: '100%', marginTop: '2px', backgroundColor: '#fff', border: '1px solid #c2bba8', borderRadius: '0 0 4px 4px', boxShadow: '0 6px 16px rgba(0,0,0,0.2)', zIndex: 200, overflow: 'hidden' }}>
+                                    <div style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
+                                        <input type="text" id="combo-search" class="form-input" placeholder="Ara..." autocomplete="off" oninput="filterComboItems()" style={{ fontSize: '12px', padding: '6px 8px' }} />
+                                    </div>
+                                    <div id="combo-list" style={{ maxHeight: '180px', overflowY: 'auto' }}>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -269,38 +278,56 @@ export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username
                 function handleSavedSelect(title) {
                     const anime = savedAnimes.find(a => a.title === title);
                     if(anime) {
-                        document.getElementById('saved-animes-input').value = title;
-                        document.getElementById('saved-animes-dropdown').style.display = 'none';
+                        document.getElementById('combo-label').innerText = title;
+                        document.getElementById('combo-label').style.color = '#333';
+                        document.getElementById('combo-panel').style.display = 'none';
                         fillFromSavedAnime(anime);
                     }
                 }
 
-                function filterSavedAnimes() {
-                    const val = document.getElementById('saved-animes-input').value.toLowerCase();
-                    const dropdown = document.getElementById('saved-animes-dropdown');
-                    const filtered = savedAnimes.filter(a => a.title.toLowerCase().includes(val));
-                    
-                    if (filtered.length === 0) {
-                        dropdown.innerHTML = '<div style="padding:10px; color:#888; font-style:italic;">Sonuc bulunamadi</div>';
+                let comboOpen = false;
+                function toggleCombo() {
+                    comboOpen = !comboOpen;
+                    const panel = document.getElementById('combo-panel');
+                    if (comboOpen) {
+                        panel.style.display = 'block';
+                        renderComboItems(savedAnimes);
+                        const search = document.getElementById('combo-search');
+                        search.value = '';
+                        setTimeout(() => search.focus(), 50);
                     } else {
-                        dropdown.innerHTML = filtered.map(a => 
-                            '<div style="padding:8px 12px; cursor:pointer; border-bottom:1px solid #f0f0f0; font-size:13px;" ' +
-                            'onmouseover="this.style.backgroundColor=\'#eef5e5\'" onmouseout="this.style.backgroundColor=\'#fff\'" ' +
-                            'onclick="handleSavedSelect(\'' + a.title.replace(/'/g, "\\'") + '\')">' +
-                            '<strong>' + a.title + '</strong>' +
-                            (a.mal_id ? ' <span style="color:#999; font-size:11px;">(MAL: ' + a.mal_id + ')</span>' : '') +
-                            '</div>'
-                        ).join('');
+                        panel.style.display = 'none';
                     }
-                    dropdown.style.display = 'block';
+                }
+
+                function filterComboItems() {
+                    const val = document.getElementById('combo-search').value.toLowerCase();
+                    const filtered = savedAnimes.filter(a => a.title.toLowerCase().includes(val));
+                    renderComboItems(filtered);
+                }
+
+                function renderComboItems(items) {
+                    const list = document.getElementById('combo-list');
+                    if (items.length === 0) {
+                        list.innerHTML = '<div style="padding:12px; color:#888; font-style:italic; text-align:center; font-size:12px;">Sonuc bulunamadi</div>';
+                        return;
+                    }
+                    list.innerHTML = items.map(a =>
+                        '<div style="padding:8px 12px; cursor:pointer; border-bottom:1px solid #f5f5f0; font-size:13px; transition:background 0.15s;" ' +
+                        'onmouseover="this.style.backgroundColor=\'#eef5e5\'" onmouseout="this.style.backgroundColor=\'#fff\'" ' +
+                        'onclick="handleSavedSelect(\'' + a.title.replace(/'/g, "\\'") + '\')">' +
+                        '<strong>' + a.title + '</strong>' +
+                        (a.mal_id ? ' <span style="color:#999; font-size:11px;">(MAL: ' + a.mal_id + ')</span>' : '') +
+                        '</div>'
+                    ).join('');
                 }
 
                 // Close dropdown when clicking outside
                 document.addEventListener('click', function(e) {
-                    const dropdown = document.getElementById('saved-animes-dropdown');
-                    const input = document.getElementById('saved-animes-input');
-                    if (dropdown && input && !dropdown.contains(e.target) && e.target !== input) {
-                        dropdown.style.display = 'none';
+                    const box = document.getElementById('combo-box');
+                    if (box && !box.contains(e.target)) {
+                        document.getElementById('combo-panel').style.display = 'none';
+                        comboOpen = false;
                     }
                 });
 
