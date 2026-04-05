@@ -81,16 +81,11 @@ app.get('/dashboard', async (c) => {
         const payload = await verify(token, JWT_SECRET, 'HS256');
         const success = c.req.query('success') === 'true';
 
-        // Real DB stats
-        const animesResult = await db.execute('SELECT seasons_data FROM animes');
-        const totalAnime = animesResult.rows.length;
-        let totalEpisodes = 0;
-        animesResult.rows.forEach((row: any) => {
-            try {
-                const seasons = JSON.parse(row.seasons_data || '[]');
-                totalEpisodes += seasons.reduce((sum: number, s: any) => sum + (s.episodes || 0), 0);
-            } catch { }
-        });
+        // Real DB stats - count only uploaded episodes
+        const animesResult = await db.execute('SELECT COUNT(*) as cnt FROM animes');
+        const totalAnime = (animesResult.rows[0] as any).cnt || 0;
+        const epsResult = await db.execute('SELECT COUNT(*) as cnt FROM episodes');
+        const totalEpisodes = (epsResult.rows[0] as any).cnt || 0;
 
         return c.html(<Dashboard username={payload.username as string} showSuccessToast={success} totalAnime={totalAnime} totalEpisodes={totalEpisodes} />);
     } catch (e) {
@@ -116,7 +111,11 @@ app.get('/archive', async (c) => {
     if (!token) return c.redirect('/?error=Lütfen giriş yapın.');
     try {
         const payload = await verify(token, JWT_SECRET, 'HS256');
-        const animesResult = await db.execute('SELECT id, mal_id, title, seasons_data, created_at FROM animes ORDER BY created_at DESC');
+        const animesResult = await db.execute(`
+            SELECT a.id, a.mal_id, a.title, a.seasons_data, a.created_at,
+                   (SELECT COUNT(*) FROM episodes e WHERE e.anime_id = a.id) as uploaded_count
+            FROM animes a ORDER BY a.created_at DESC
+        `);
         return c.html(<Archive username={payload.username as string} animes={animesResult.rows as any} />);
     } catch {
         return c.redirect('/?error=Oturum süresi doldu.');
@@ -146,6 +145,24 @@ apiV1.post('/upload/metadata', async (c) => {
                       ON CONFLICT(title) DO UPDATE SET seasons_data=excluded.seasons_data, mal_id=excluded.mal_id`,
                 args: [title, malId, seasonsData]
             });
+
+            // Record the uploaded episode
+            const season = body.target_season ? parseInt(body.target_season as string) : null;
+            const episode = body.target_episode ? parseInt(body.target_episode as string) : null;
+            const services = body.services as string || '{}';
+
+            if (season && episode) {
+                const animeRow = await db.execute({ sql: 'SELECT id FROM animes WHERE title = ?', args: [title] });
+                if (animeRow.rows.length > 0) {
+                    const animeId = (animeRow.rows[0] as any).id;
+                    await db.execute({
+                        sql: `INSERT INTO episodes (anime_id, season, episode, services) VALUES (?, ?, ?, ?)
+                              ON CONFLICT(anime_id, season, episode) DO UPDATE SET services=excluded.services`,
+                        args: [animeId, season, episode, services]
+                    });
+                }
+            }
+
             return c.json({ status: 'ok' });
         }
         return c.json({ status: 'bad_request' }, 400);
@@ -158,10 +175,21 @@ apiV1.post('/upload/metadata', async (c) => {
 apiV1.delete('/upload/anime/:id', async (c) => {
     try {
         const id = parseInt(c.req.param('id'));
+        await db.execute({ sql: 'DELETE FROM episodes WHERE anime_id = ?', args: [id] });
         await db.execute({ sql: 'DELETE FROM animes WHERE id = ?', args: [id] });
         return c.json({ status: 'ok' });
     } catch (e) {
         console.error('Delete error', e);
+        return c.json({ status: 'error' }, 500);
+    }
+});
+
+apiV1.get('/upload/anime/:id/episodes', async (c) => {
+    try {
+        const id = parseInt(c.req.param('id'));
+        const result = await db.execute({ sql: 'SELECT * FROM episodes WHERE anime_id = ? ORDER BY season, episode', args: [id] });
+        return c.json({ episodes: result.rows });
+    } catch (e) {
         return c.json({ status: 'error' }, 500);
     }
 });

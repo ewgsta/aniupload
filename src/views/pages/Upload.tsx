@@ -27,14 +27,12 @@ export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username
 
                     {/* Kayıtlı Animeler / Arşiv Arama */}
                     {savedAnimes.length > 0 && (
-                        <div style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '4px', border: '1px solid #c2bba8', marginBottom: '15px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)' }}>
-                            <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#3b5323', display: 'block', marginBottom: '5px' }}>Daha Önce Eklenenlerden Seç</label>
-                            <input type="text" list="saved-animes-datalist" id="saved-animes-input" class="form-input" placeholder="Arşivde anime ara (Tıklayınca otomatik metadatalar dolar)..." onchange="handleSavedSelect()" />
-                            <datalist id="saved-animes-datalist">
-                                {savedAnimes.map(a => (
-                                    <option value={a.title} />
-                                ))}
-                            </datalist>
+                        <div style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '4px', border: '1px solid #c2bba8', marginBottom: '15px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)', position: 'relative' }}>
+                            <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#3b5323', display: 'block', marginBottom: '5px' }}>Daha Once Eklenenlerden Sec</label>
+                            <input type="text" id="saved-animes-input" class="form-input" placeholder="Arsivde anime ara..." autocomplete="off"
+                                oninput="filterSavedAnimes()" onfocus="filterSavedAnimes()" />
+                            <div id="saved-animes-dropdown" style={{ display: 'none', position: 'absolute', left: '15px', right: '15px', top: '100%', marginTop: '-10px', backgroundColor: '#fff', border: '1px solid #c2bba8', borderTop: 'none', borderRadius: '0 0 4px 4px', maxHeight: '180px', overflowY: 'auto', zIndex: 100, boxShadow: '0 4px 8px rgba(0,0,0,0.15)' }}>
+                            </div>
                         </div>
                     )}
 
@@ -125,7 +123,7 @@ export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username
                     </div>
 
                     <button class="btn btn-auto" style={{ background: 'linear-gradient(to bottom, #999, #777)', borderColor: '#555' }} onclick="nextStep(3)">&lt; Geri</button>
-                    <button class="btn btn-auto" style={{ marginLeft: '10px', background: 'linear-gradient(to bottom, #b22222, #8b0000)', borderColor: '#5c0000', color: '#fff' }} onclick="startUpload()">🚀 İşlemi Başlat</button>
+                    <button class="btn btn-auto" style={{ marginLeft: '10px', background: 'linear-gradient(to bottom, #b22222, #8b0000)', borderColor: '#5c0000', color: '#fff' }} onclick="startUpload()">Islemi Baslat</button>
                 </div>
             </div>
 
@@ -268,12 +266,43 @@ export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username
                     status.style.color = "#3b5323";
                 }
 
-                function handleSavedSelect() {
-                    const val = document.getElementById('saved-animes-input').value;
-                    if(!val) return;
-                    const anime = savedAnimes.find(a => a.title === val);
-                    if(anime) fillFromSavedAnime(anime);
+                function handleSavedSelect(title) {
+                    const anime = savedAnimes.find(a => a.title === title);
+                    if(anime) {
+                        document.getElementById('saved-animes-input').value = title;
+                        document.getElementById('saved-animes-dropdown').style.display = 'none';
+                        fillFromSavedAnime(anime);
+                    }
                 }
+
+                function filterSavedAnimes() {
+                    const val = document.getElementById('saved-animes-input').value.toLowerCase();
+                    const dropdown = document.getElementById('saved-animes-dropdown');
+                    const filtered = savedAnimes.filter(a => a.title.toLowerCase().includes(val));
+                    
+                    if (filtered.length === 0) {
+                        dropdown.innerHTML = '<div style="padding:10px; color:#888; font-style:italic;">Sonuc bulunamadi</div>';
+                    } else {
+                        dropdown.innerHTML = filtered.map(a => 
+                            '<div style="padding:8px 12px; cursor:pointer; border-bottom:1px solid #f0f0f0; font-size:13px;" ' +
+                            'onmouseover="this.style.backgroundColor=\'#eef5e5\'" onmouseout="this.style.backgroundColor=\'#fff\'" ' +
+                            'onclick="handleSavedSelect(\'' + a.title.replace(/'/g, "\\'") + '\')">' +
+                            '<strong>' + a.title + '</strong>' +
+                            (a.mal_id ? ' <span style="color:#999; font-size:11px;">(MAL: ' + a.mal_id + ')</span>' : '') +
+                            '</div>'
+                        ).join('');
+                    }
+                    dropdown.style.display = 'block';
+                }
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    const dropdown = document.getElementById('saved-animes-dropdown');
+                    const input = document.getElementById('saved-animes-input');
+                    if (dropdown && input && !dropdown.contains(e.target) && e.target !== input) {
+                        dropdown.style.display = 'none';
+                    }
+                });
 
                 function addSeasonRow() {
                     const noSeasonText = document.getElementById('no-season-text');
@@ -414,13 +443,21 @@ export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username
                     
                     const malId = document.getElementById('mal-id').value;
 
+                    const selectedServers = [];
+                    document.querySelectorAll('.server-cb:checked').forEach(cb => selectedServers.push(cb.value));
+                    const servicesObj = {};
+                    selectedServers.forEach(s => servicesObj[s] = 'https://' + s + '.mock/video/' + Math.random().toString(36).substring(7));
+
                     fetch('/api/v1/upload/metadata', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({
                             title: title,
                             mal_id: malId,
-                            seasons_data: JSON.stringify(seasonsData)
+                            seasons_data: JSON.stringify(seasonsData),
+                            target_season: selectedSeason,
+                            target_episode: selectedEpisode,
+                            services: JSON.stringify(servicesObj)
                         })
                     }).catch(console.error);
 

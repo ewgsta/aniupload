@@ -41,14 +41,21 @@ export const initDb = async () => {
       )
     `);
 
-    // Geçmiş tabloyu yeni JSON yapısına uydurmak için
-    try {
-        await db.execute('ALTER TABLE animes ADD COLUMN seasons_data TEXT');
-    } catch (e) { }
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS episodes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        anime_id INTEGER NOT NULL,
+        season INTEGER NOT NULL DEFAULT 1,
+        episode INTEGER NOT NULL DEFAULT 1,
+        services TEXT DEFAULT '{}',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (anime_id) REFERENCES animes(id) ON DELETE CASCADE,
+        UNIQUE(anime_id, season, episode)
+      )
+    `);
 
-    try {
-        await db.execute('ALTER TABLE animes ADD COLUMN mal_id INTEGER');
-    } catch (e) { }
+    try { await db.execute('ALTER TABLE animes ADD COLUMN seasons_data TEXT'); } catch (e) { }
+    try { await db.execute('ALTER TABLE animes ADD COLUMN mal_id INTEGER'); } catch (e) { }
 
     console.log('[DB] Database initialized successfully.');
 };
