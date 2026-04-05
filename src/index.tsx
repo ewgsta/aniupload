@@ -112,14 +112,13 @@ apiV1.post('/upload/metadata', async (c) => {
         }
 
         const title = body.title as string;
-        const seasons = parseInt(body.seasons as string) || 1;
-        const episodes = parseInt(body.episodes as string) || 12;
+        const seasonsData = body.seasons_data as string || '[]';
 
         if (title) {
             await db.execute({
-                sql: `INSERT INTO animes (title, total_seasons, total_episodes) VALUES (?, ?, ?)
-                      ON CONFLICT(title) DO UPDATE SET total_seasons=excluded.total_seasons, total_episodes=excluded.total_episodes`,
-                args: [title, seasons, episodes]
+                sql: `INSERT INTO animes (title, seasons_data) VALUES (?, ?)
+                      ON CONFLICT(title) DO UPDATE SET seasons_data=excluded.seasons_data`,
+                args: [title, seasonsData]
             });
             return c.json({ status: 'ok' });
         }

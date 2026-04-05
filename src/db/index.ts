@@ -35,11 +35,16 @@ export const initDb = async () => {
       CREATE TABLE IF NOT EXISTS animes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT UNIQUE NOT NULL,
-        total_seasons INTEGER DEFAULT 1,
-        total_episodes INTEGER DEFAULT 12,
+        seasons_data TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    try {
+        await db.execute('ALTER TABLE animes ADD COLUMN seasons_data TEXT');
+    } catch (e) {
+        // siktir et.
+    }
 
     console.log('[DB] Database initialized successfully.');
 };

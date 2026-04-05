@@ -23,22 +23,38 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
 
                 {/* STEP 1 */}
                 <div id="step-1" class="upload-step">
-                    <h3 style={{ marginBottom: '15px', color: '#3b5323' }}>Anime Metadataları</h3>
-                    <p style={{ color: '#666', fontSize: '13px', marginBottom: '15px' }}>Seri veritabanında yoksa otomatik olarak indekslenip kaydedilecektir.</p>
+                    <h3 style={{ marginBottom: '15px', color: '#3b5323' }}>Anime Bilgisi</h3>
+
+                    {/* MAL ID Fethcer */}
+                    <div style={{ backgroundColor: '#eef5e5', padding: '15px', borderRadius: '4px', border: '1px solid #c2bba8', marginBottom: '15px' }}>
+                        <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#3b5323', display: 'block', marginBottom: '5px' }}>MyAnimeList'ten Veri Çek</label>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <input type="text" id="mal-id" class="form-input" placeholder="MAL Anime ID (Örn: 20)" style={{ flex: 1 }} />
+                            <button class="btn btn-small" type="button" onclick="fetchMalData()" id="mal-btn">Otomatik Doldur</button>
+                        </div>
+                        <div id="mal-status" style={{ fontSize: '12px', color: '#666', marginTop: '5px', display: 'none' }}></div>
+                    </div>
+
                     <div class="form-group">
                         <label>Anime Adı (Örn: Naruto Shippuden)</label>
                         <input type="text" id="anime-title" class="form-input" placeholder="Anime ismini girin..." />
                     </div>
-                    <div style={{ display: 'flex', gap: '15px' }}>
-                        <div class="form-group" style={{ flex: 1 }}>
-                            <label>Toplam Sezon</label>
-                            <input type="number" id="anime-seasons" class="form-input" value="1" min="1" />
-                        </div>
-                        <div class="form-group" style={{ flex: 1 }}>
-                            <label>Toplam Bölüm</label>
-                            <input type="number" id="anime-episodes" class="form-input" value="12" min="1" />
+
+                    <div class="form-group">
+                        <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                            <span>Sezon Yapılandırması</span>
+                            <button class="btn btn-small" onclick="addSeasonRow()" type="button" style={{ margin: 0, padding: '4px 10px', background: '#dcdcdc', color: '#333', borderColor: '#ccc', textShadow: 'none' }}>+ Yeni Sezon Ekle</button>
+                        </label>
+
+                        <div id="seasons-container" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <div class="season-row" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#fff', border: '1px solid #eee', padding: '10px', borderRadius: '4px' }}>
+                                <strong style={{ color: '#666', fontSize: '13px', minWidth: '60px' }}>Sezon 1</strong>
+                                <input type="number" class="form-input season-episodes-input" value="12" min="1" placeholder="Bölüm" style={{ flex: 1 }} />
+                                <span style={{ fontSize: '13px', color: '#999' }}>Bölüm</span>
+                            </div>
                         </div>
                     </div>
+
                     <button class="btn btn-auto" onclick="nextStep(2)">İleri: Bölüm Seçimi &gt;</button>
                 </div>
 
@@ -163,6 +179,58 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
                     document.querySelectorAll('.server-cb').forEach(cb => cb.checked = true);
                 }
 
+                let seasonCount = 1;
+                function addSeasonRow() {
+                    seasonCount++;
+                    const container = document.getElementById('seasons-container');
+                    const row = document.createElement('div');
+                    row.className = 'season-row';
+                    row.style.display = 'flex';
+                    row.style.alignItems = 'center';
+                    row.style.gap = '10px';
+                    row.style.background = '#fff';
+                    row.style.border = '1px solid #eee';
+                    row.style.padding = '10px';
+                    row.style.borderRadius = '4px';
+                    row.innerHTML = '<strong style="color: #666; font-size: 13px; min-width: 60px;">Sezon ' + seasonCount + '</strong>' +
+                                    '<input type="number" class="form-input season-episodes-input" value="12" min="1" placeholder="Bölüm" style="flex: 1;" />' +
+                                    '<span style="font-size: 13px; color: #999;">Bölüm</span>';
+                    container.appendChild(row);
+                }
+
+                function fetchMalData() {
+                    const malId = document.getElementById('mal-id').value;
+                    if(!malId) return;
+                    const status = document.getElementById('mal-status');
+                    status.style.display = 'block';
+                    status.innerText = "Jikan API'den bilgi çekiliyor...";
+                    status.style.color = "#666";
+                    document.getElementById('mal-btn').disabled = true;
+
+                    fetch('https://api.jikan.moe/v4/anime/' + malId)
+                        .then(res => res.json())
+                        .then(res => {
+                            document.getElementById('mal-btn').disabled = false;
+                            if(res.data) {
+                                document.getElementById('anime-title').value = res.data.title || res.data.title_english || '';
+                                if(res.data.episodes) {
+                                    const epsInput = document.querySelector('.season-episodes-input');
+                                    if(epsInput) epsInput.value = res.data.episodes;
+                                }
+                                status.innerText = "Başarıyla dolduruldu! (" + res.data.title + ")";
+                                status.style.color = "#3b5323";
+                            } else {
+                                status.innerText = "Veri bulunamadı, ID'yi kontrol edin.";
+                                status.style.color = "#991b1b";
+                            }
+                        })
+                        .catch(e => {
+                            document.getElementById('mal-btn').disabled = false;
+                            status.innerText = "Jikan API'ye ulaşılamadı.";
+                            status.style.color = "#991b1b";
+                        });
+                }
+
                 function startUpload() {
                     const title = document.getElementById('anime-title').value;
                     if (!title) {
@@ -195,13 +263,18 @@ export const Upload: FC<{ username: string }> = ({ username }) => {
                     setTimeout(() => progressToast.style.transform = 'scale(1)', 300);
 
                     // API Call
+                    const epsInputs = document.querySelectorAll('.season-episodes-input');
+                    const seasonsData = [];
+                    epsInputs.forEach((input, index) => {
+                        seasonsData.push({ season: index + 1, episodes: parseInt(input.value) || 1 });
+                    });
+                    
                     fetch('/api/v1/upload/metadata', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({
                             title: title,
-                            seasons: document.getElementById('anime-seasons').value,
-                            episodes: document.getElementById('anime-episodes').value
+                            seasons_data: JSON.stringify(seasonsData)
                         })
                     }).catch(console.error);
 
