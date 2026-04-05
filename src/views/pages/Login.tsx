@@ -8,7 +8,6 @@ export const Login: FC = () => {
                 <div class="panel-card">
                     <div class="card-header">
                         <h1>AniUpload</h1>
-                        <p>Arşive giriş yap</p>
                     </div>
 
                     <form action="/dashboard" method="post">
