@@ -1,14 +1,14 @@
 import type { FC } from 'hono/jsx';
 import { Layout } from '../components/Layout.js';
 
-export const Dashboard: FC = () => {
+export const Dashboard: FC<{ username: string }> = ({ username }) => {
     return (
         <Layout title="AniUpload - Dashboard">
             <nav class="transparent-nav">
                 <h2>AniUpload Arşivi</h2>
                 <div class="nav-user-area">
-                    <span style={{ textShadow: "1px 1px 0px rgba(255,255,255,0.8)" }}>Oturum: ewgsta</span>
-                    <a href="/" class="btn btn-small" style={{ textDecoration: 'none' }}>Çıkış Yap</a>
+                    <span style={{ textShadow: "1px 1px 0px rgba(255,255,255,0.8)" }}>Oturum: {username}</span>
+                    <a href="/logout" class="btn btn-small" style={{ textDecoration: 'none' }}>Çıkış Yap</a>
                 </div>
             </nav>
 

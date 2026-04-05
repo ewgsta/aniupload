@@ -1,14 +1,14 @@
 import type { FC } from 'hono/jsx';
 import { Layout } from '../components/Layout.js';
 
-export const Login: FC<{ error?: string }> = ({ error }) => {
+export const Register: FC<{ error?: string }> = ({ error }) => {
     return (
-        <Layout title="AniUpload - Giriş">
+        <Layout title="AniUpload - Kayıt Ol">
             <div class="center-layout">
                 <div class="panel-card">
                     <div class="card-header">
                         <h1>AniUpload</h1>
-                        <p>Arşive giriş yap</p>
+                        <p>Aramıza Katıl</p>
                     </div>
 
                     {error && (
@@ -17,10 +17,14 @@ export const Login: FC<{ error?: string }> = ({ error }) => {
                         </div>
                     )}
 
-                    <form action="/login" method="post">
+                    <form action="/register" method="post">
                         <div class="form-group">
-                            <label for="username">Kullanıcı Adı veya Email</label>
+                            <label for="username">Kullanıcı Adı</label>
                             <input type="text" id="username" class="form-input" name="username" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="email">E-Posta Adresi</label>
+                            <input type="email" id="email" class="form-input" name="email" required />
                         </div>
 
                         <div class="form-group">
@@ -28,11 +32,11 @@ export const Login: FC<{ error?: string }> = ({ error }) => {
                             <input type="password" id="password" class="form-input" name="password" required />
                         </div>
 
-                        <button type="submit" class="btn">Giriş Yap</button>
+                        <button type="submit" class="btn">Kayıt Ol</button>
                     </form>
 
                     <div class="footer-links">
-                        <a href="/register">Kayıt Ol</a>
+                        <a href="/">Zaten hesabın var mı? Giriş Yap</a>
                     </div>
                 </div>
             </div>
