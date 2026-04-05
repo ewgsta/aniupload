@@ -166,12 +166,18 @@ export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username
                         return;
                     }
                     
+                    const season = parseInt(seasonSelect.value);
                     const opt = seasonSelect.options[seasonSelect.selectedIndex];
                     const maxEps = parseInt(opt.getAttribute('data-eps')) || 0;
                     
                     epSelect.innerHTML = '<option value="">-- Bölüm Seç --</option>';
                     for(let i=1; i<=maxEps; i++) {
-                        epSelect.innerHTML += '<option value="' + i + '">Bölüm ' + i + '</option>';
+                        const isUploaded = uploadedEpisodes.find(ue => ue.season === season && ue.episode === i);
+                        if (isUploaded) {
+                            epSelect.innerHTML += '<option value="' + i + '" disabled style="color: #ccc;">Bölüm ' + i + ' (Yüklendi)</option>';
+                        } else {
+                            epSelect.innerHTML += '<option value="' + i + '">Bölüm ' + i + '</option>';
+                        }
                     }
                     epSelect.disabled = false;
                 }
@@ -244,9 +250,52 @@ export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username
                 }
 
                 let seasonCount = 0;
+                let uploadedEpisodes = []; // [{season, episode}, ...]
                 const savedAnimes = ${raw(JSON.stringify(savedAnimes))};
                 
-                function fillFromSavedAnime(data) {
+                async function fetchUploadedEpisodes(animeId) {
+                    try {
+                        const res = await fetch('/api/v1/upload/anime/' + animeId + '/episodes');
+                        const data = await res.json();
+                        uploadedEpisodes = data.episodes || [];
+                        return uploadedEpisodes;
+                    } catch (e) {
+                        console.error('Bölümler çekilemedi:', e);
+                        uploadedEpisodes = [];
+                        return [];
+                    }
+                }
+
+                function getNextEpisode(seasonsData) {
+                    let maxSeason = 1;
+                    let maxEp = 0;
+                    
+                    if (uploadedEpisodes.length > 0) {
+                        uploadedEpisodes.forEach(ue => {
+                            if (ue.season > maxSeason) {
+                                maxSeason = ue.season;
+                                maxEp = ue.episode;
+                            } else if (ue.season === maxSeason && ue.episode > maxEp) {
+                                maxEp = ue.episode;
+                            }
+                        });
+                    }
+
+                    // Get max episodes for current maxSeason from metadata
+                    let seasons = [];
+                    try { seasons = JSON.parse(seasonsData || '[]'); } catch(e) {}
+                    const currentSeasonMeta = seasons.find(s => s.index === maxSeason);
+                    
+                    if (currentSeasonMeta && maxEp >= currentSeasonMeta.episodes) {
+                        // Current season finished, go to next if exists
+                        if (seasons.find(s => s.index === maxSeason + 1)) {
+                            return { season: maxSeason + 1, episode: 1 };
+                        }
+                    }
+                    return { season: maxSeason, episode: maxEp + 1 };
+                }
+
+                async function fillFromSavedAnime(data, isAuto = false) {
                     document.getElementById('anime-title').value = data.title;
                     document.getElementById('mal-id').value = data.mal_id || '';
                     
@@ -267,9 +316,28 @@ export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username
                     } catch(e) {
                          reindexSeasons();
                     }
+
+                    // Fetch uploaded episodes to block them in dropdown
+                    await fetchUploadedEpisodes(data.id);
+
                     const status = document.getElementById('mal-status');
                     status.style.display = 'block';
-                    status.innerText = "Lokal veritabanından başarıyla yüklendi! (" + data.title + ")"; status.style.color = "#3b5323";
+                    status.innerText = "Lokal veritabanından başarıyla yüklendi! (" + data.title + ")"; 
+                    status.style.color = "#3b5323";
+
+                    if (isAuto) {
+                        const next = getNextEpisode(data.seasons_data);
+                        nextStep(2); // Jump to step 2
+                        
+                        // Wait for step 2 inputs to be populated by nextStep(2) logic
+                        setTimeout(() => {
+                            const sSelect = document.getElementById('target-season');
+                            sSelect.value = next.season;
+                            updateEpisodeDropdown();
+                            const eSelect = document.getElementById('target-episode');
+                            eSelect.value = next.episode;
+                        }, 50);
+                    }
                 }
 
                 function handleSavedSelect(title) {
@@ -342,6 +410,14 @@ export const Upload: FC<{ username: string, savedAnimes?: any[] }> = ({ username
                             panel.style.display = 'none';
                         }
                     });
+
+                    // Handle anime_id from URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const animeId = urlParams.get('anime_id');
+                    if (animeId) {
+                         const anime = savedAnimes.find(a => a.id == animeId);
+                         if (anime) fillFromSavedAnime(anime, true);
+                    }
                 });
 
                 function addSeasonRow() {
