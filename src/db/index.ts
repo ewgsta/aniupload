@@ -54,8 +54,13 @@ export const initDb = async () => {
       )
     `);
 
-    try { await db.execute('ALTER TABLE animes ADD COLUMN seasons_data TEXT'); } catch (e) { }
-    try { await db.execute('ALTER TABLE animes ADD COLUMN mal_id INTEGER'); } catch (e) { }
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
 
     console.log('[DB] Database initialized successfully.');
 };

@@ -1,3 +1,4 @@
+/** @jsxImportSource hono/jsx */
 import type { FC } from 'hono/jsx';
 import { Layout } from '../components/Layout.js';
 
@@ -33,6 +34,7 @@ export const Dashboard: FC<{ username: string; showSuccessToast?: boolean; total
                     <p style={{ fontSize: '13px', color: '#666', margin: '10px 0 15px 0' }}>Sistemde bekleyen bir video işleme bulunmuyor.</p>
                     <a href="/upload" class="btn btn-auto" style={{ textDecoration: 'none' }}>Yeni Anime Yükle</a>
                     <a href="/archive" class="btn btn-auto" style={{ marginLeft: '10px', textDecoration: 'none', background: 'linear-gradient(to bottom, #dcdcdc 0%, #c0c0c0 100%)', borderColor: '#888', color: '#333', textShadow: '1px 1px 0 #fff' }}>Arşivi İncele</a>
+                    <a href="/settings" class="btn btn-auto" style={{ marginLeft: '10px', textDecoration: 'none', background: '#f5f5f5', color: '#666', borderColor: '#ccc' }}>⚙ Ayarlar</a>
                 </div>
             </div>
 

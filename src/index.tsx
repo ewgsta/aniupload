@@ -1,3 +1,4 @@
+/** @jsxImportSource hono/jsx */
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
@@ -12,7 +13,10 @@ import { Upload } from './views/pages/Upload.js';
 import { Login } from './views/pages/Login.js';
 import { Archive } from './views/pages/Archive.js';
 import { ArchiveDetail } from './views/pages/ArchiveDetail.js';
+import { Settings } from './views/pages/Settings.js';
 import { AuthService } from './services/auth.service.js';
+import { SettingsService } from './services/settings.service.js';
+import { AbyssService } from './services/abyss.service.js';
 import { initDb, db } from './db/index.js';
 
 const app = new Hono();
@@ -147,6 +151,35 @@ app.get('/archive/:id', async (c) => {
         />);
     } catch {
         return c.redirect('/?error=Oturum süresi doldu.');
+    }
+});
+
+app.get('/settings', async (c) => {
+    const token = getCookie(c, 'auth_token');
+    if (!token) return c.redirect('/?error=Lütfen giriş yapın.');
+    try {
+        const payload = await verify(token, JWT_SECRET, 'HS256');
+        const settings = await SettingsService.getAll();
+        const error = c.req.query('error');
+        const success = c.req.query('success');
+        return c.html(<Settings username={payload.username as string} settings={settings} error={error} success={success} />);
+    } catch {
+        return c.redirect('/?error=Oturum süresi doldu.');
+    }
+});
+
+app.post('/settings/save', async (c) => {
+    const token = getCookie(c, 'auth_token');
+    if (!token) return c.redirect('/?error=Lütfen giriş yapın.');
+    try {
+        await verify(token, JWT_SECRET, 'HS256');
+        const body = await c.req.parseBody();
+        for (const [key, value] of Object.entries(body)) {
+            await SettingsService.set(key, value as string);
+        }
+        return c.redirect('/settings?success=Ayarlar başarıyla kaydedildi.');
+    } catch {
+        return c.redirect('/settings?error=Ayarlar kaydedilirken bir hata oluştu.');
     }
 });
 

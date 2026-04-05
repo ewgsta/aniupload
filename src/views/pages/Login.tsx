@@ -1,3 +1,4 @@
+/** @jsxImportSource hono/jsx */
 import type { FC } from 'hono/jsx';
 import { Layout } from '../components/Layout.js';
 
