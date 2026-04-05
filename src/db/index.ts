@@ -2,11 +2,20 @@ import { createClient } from '@libsql/client';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-const url = process.env.TURSO_DATABASE_URL || 'file:./local.db';
+const isProd = process.env.NODE_ENV === 'production';
+let url = process.env.TURSO_DATABASE_URL;
 const authToken = process.env.TURSO_AUTH_TOKEN;
 
+if (isProd) {
+    if (!url) {
+        throw new Error('TURSO_DATABASE_URL is required in production environment.');
+    }
+} else {
+    url = url || 'file:./local.db';
+}
+
 export const db = createClient({
-    url,
+    url: url!,
     authToken,
 });
 
