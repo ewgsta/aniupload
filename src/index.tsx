@@ -8,9 +8,10 @@ import { sign, verify } from 'hono/jwt';
 import { uploadRoutes } from './routes/upload.routes.js';
 import { logger } from './utils/logger.js';
 import { Dashboard } from './views/pages/Dashboard.js';
+import { Upload } from './views/pages/Upload.js';
 import { Login } from './views/pages/Login.js';
 import { AuthService } from './services/auth.service.js';
-import { initDb } from './db/index.js';
+import { initDb, db } from './db/index.js';
 
 const app = new Hono();
 const authService = new AuthService();
@@ -86,8 +87,48 @@ app.get('/dashboard', async (c) => {
     }
 });
 
+app.get('/upload', async (c) => {
+    const token = getCookie(c, 'auth_token');
+    if (!token) return c.redirect('/?error=Lütfen giriş yapın.');
+    try {
+        const payload = await verify(token, JWT_SECRET, 'HS256');
+        return c.html(<Upload username={payload.username as string} />);
+    } catch {
+        return c.redirect('/?error=Oturum süresi doldu.');
+    }
+});
+
 // ----- API ROUTES -----
 const apiV1 = new Hono();
+
+apiV1.post('/upload/metadata', async (c) => {
+    try {
+        // Try to parse json regardless of content-type for flexibility
+        let body;
+        try {
+            body = await c.req.json();
+        } catch {
+            body = await c.req.parseBody();
+        }
+
+        const title = body.title as string;
+        const seasons = parseInt(body.seasons as string) || 1;
+        const episodes = parseInt(body.episodes as string) || 12;
+
+        if (title) {
+            await db.execute({
+                sql: `INSERT INTO animes (title, total_seasons, total_episodes) VALUES (?, ?, ?)
+                      ON CONFLICT(title) DO UPDATE SET total_seasons=excluded.total_seasons, total_episodes=excluded.total_episodes`,
+                args: [title, seasons, episodes]
+            });
+            return c.json({ status: 'ok' });
+        }
+        return c.json({ status: 'bad_request' }, 400);
+    } catch (e) {
+        console.error('Metadata DB error', e);
+        return c.json({ status: 'error' }, 500);
+    }
+});
 
 // API Health Check
 apiV1.get('/', (c) => {

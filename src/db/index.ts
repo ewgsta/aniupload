@@ -30,5 +30,16 @@ export const initDb = async () => {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS animes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT UNIQUE NOT NULL,
+        total_seasons INTEGER DEFAULT 1,
+        total_episodes INTEGER DEFAULT 12,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     console.log('[DB] Database initialized successfully.');
 };

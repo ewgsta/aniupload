@@ -31,7 +31,7 @@ export const Dashboard: FC<{ username: string; showSuccessToast?: boolean }> = (
                 <div style={{ backgroundColor: '#fff', padding: '15px', border: '1px solid #c2bba8', borderRadius: '4px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
                     <h3 style={{ fontSize: '15px', marginBottom: '10px', color: '#3b5323' }}>Hızlı İşlemler</h3>
                     <p style={{ fontSize: '13px', color: '#666', margin: '10px 0 15px 0' }}>Sistemde bekleyen bir video işleme bulunmuyor.</p>
-                    <button class="btn btn-auto">Yeni Anime Yükle</button>
+                    <a href="/upload" class="btn btn-auto" style={{ textDecoration: 'none' }}>Yeni Anime Yükle</a>
                     <button class="btn btn-auto" style={{ marginLeft: '10px', background: 'linear-gradient(to bottom, #dcdcdc 0%, #c0c0c0 100%)', borderColor: '#888', color: '#333', textShadow: '1px 1px 0 #fff' }}>Arşivi İncele</button>
                 </div>
             </div>
